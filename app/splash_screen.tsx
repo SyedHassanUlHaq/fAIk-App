@@ -10,13 +10,15 @@ import {
   Dimensions,
   Keyboard,
   Platform,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage'; // For saving JWT token
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   useAnimatedGestureHandler,
-  runOnJS,
 } from "react-native-reanimated";
 import {
   PanGestureHandler,
@@ -34,7 +36,12 @@ export default function GetStartedLoginScreen() {
   const threshold = -height * 0.15;
   const [secureText, setSecureText] = useState(true);
 
-  // Keyboard listeners to update keyboardHeight shared value
+  // New states for authentication
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   useEffect(() => {
     const showSub = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
@@ -144,6 +151,58 @@ export default function GetStartedLoginScreen() {
     transform: [{ translateY: translateY.value }],
   }));
 
+  // === AUTH FUNCTION ===
+  const handleLogin = async () => {
+    setErrorMsg(""); // reset error
+    if (!email || !password) {
+      setErrorMsg("Please enter both email and password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("https://your-api-url.com/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        // Assuming the token is in data.token
+        await AsyncStorage.setItem("jwt_token", data.token);
+
+        // Navigate to your app's main screen or update auth state here
+        Alert.alert("Success", "Logged in successfully!");
+      } else if (response.status === 401) {
+        setErrorMsg("Invalid credentials.");
+      } else {
+        setErrorMsg("Login failed. Please try again.");
+      }
+    } catch (error) {
+      setErrorMsg("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // === BUTTON HANDLERS ===
+  const onForgotPassword = () => {
+    Alert.alert("Forgot Password", "Navigate to forgot password screen");
+  };
+
+  const onGoogleSignIn = () => {
+    Alert.alert("Google Sign-In", "Google authentication flow to be implemented");
+  };
+
+  const onSignUp = () => {
+    Alert.alert("Sign Up", "Navigate to signup screen");
+  };
+
+
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -218,6 +277,12 @@ export default function GetStartedLoginScreen() {
               <View style={styles.dragHandle} />
               <Text style={styles.loginTitle}>Login to continue</Text>
 
+              {errorMsg ? (
+                <Text style={{ color: "red", marginBottom: 10, textAlign: "center" }}>
+                  {errorMsg}
+                </Text>
+              ) : null}
+
               {/* Email */}
               <View style={styles.fieldWrapper}>
                 <Text style={styles.label}>Email</Text>
@@ -225,6 +290,9 @@ export default function GetStartedLoginScreen() {
                   style={styles.transparentInput}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                  editable={!loading}
                 />
               </View>
 
@@ -235,13 +303,16 @@ export default function GetStartedLoginScreen() {
                   <TextInput
                     style={{
                       flex: 1,
-                      paddingHorizontal: 8,
+                      paddingHorizontal: 3,
                       paddingVertical: 17,
                       fontSize: 16,
                       color: "#000",
                       backgroundColor: "transparent",
                     }}
                     secureTextEntry={secureText}
+                    value={password}
+                    onChangeText={setPassword}
+                    editable={!loading}
                   />
                   <TouchableOpacity
                     style={styles.eyeIcon}
@@ -255,7 +326,11 @@ export default function GetStartedLoginScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity style={styles.forgotPassword}>
+                <TouchableOpacity
+                  style={styles.forgotPassword}
+                  onPress={onForgotPassword}
+                  disabled={loading}
+                >
                   <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
                 </TouchableOpacity>
               </View>
@@ -263,16 +338,26 @@ export default function GetStartedLoginScreen() {
               {/* Separator */}
               <View style={styles.separator}>
                 <View style={styles.line} />
-                <Image
-                  source={require("../assets/icons/google.png")}
-                  style={styles.googleIcon}
-                />
+                <TouchableOpacity onPress={onGoogleSignIn} disabled={loading}>
+                  <Image
+                    source={require("../assets/icons/google.png")}
+                    style={styles.googleIcon}
+                  />
+                </TouchableOpacity>
                 <View style={styles.line} />
               </View>
 
               {/* Login Button */}
-              <TouchableOpacity style={styles.loginButton}>
-                <Text style={styles.loginButtonText}>Login</Text>
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.loginButtonText}>Login</Text>
+                )}
               </TouchableOpacity>
 
               {/* Footer */}
@@ -284,6 +369,7 @@ export default function GetStartedLoginScreen() {
                     fontWeight: "bold",
                     textDecorationLine: "underline",
                   }}
+                  onPress={onSignUp}
                 >
                   Sign up
                 </Text>
