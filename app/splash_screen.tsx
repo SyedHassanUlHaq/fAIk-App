@@ -27,8 +27,10 @@ import {
 } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useRouter } from "expo-router";
 
 const { height } = Dimensions.get("window");
+const router = useRouter();
 
 export default function GetStartedLoginScreen() {
   const translateY = useSharedValue(0);
@@ -226,7 +228,7 @@ export default function GetStartedLoginScreen() {
                 >
                   <Text
                     style={{
-                      fontSize: 30,
+                      fontSize: 35,
                       color: "white",
                       fontFamily: "PoppinsSemiBold",
                     }}
@@ -249,7 +251,7 @@ export default function GetStartedLoginScreen() {
                 <Animated.View
                   style={[{ paddingHorizontal: 20, bottom: 50 }, animatedNewTextOpacity]}
                 >
-                  <Text style={{ fontSize: 30, fontFamily: "PoppinsExtraBold" }}>
+                  <Text style={{ fontSize: 35, fontFamily: "PoppinsExtraBold" }}>
                     <Text style={{ color: "#02D1FF" }}>Hello.</Text>
                     {"\n"}
                     <Text style={{ color: "white" }}>Welcome back!</Text>
@@ -289,6 +291,7 @@ export default function GetStartedLoginScreen() {
                 <TextInput
                   style={styles.transparentInput}
                   keyboardType="email-address"
+                  placeholder="Enter your email"
                   autoCapitalize="none"
                   value={email}
                   onChangeText={setEmail}
@@ -304,13 +307,14 @@ export default function GetStartedLoginScreen() {
                     style={{
                       flex: 1,
                       paddingHorizontal: 3,
-                      paddingVertical: 17,
+                      height: 55,
                       fontSize: 16,
                       color: "#000",
                       backgroundColor: "transparent",
                     }}
                     secureTextEntry={secureText}
                     value={password}
+                    placeholder="Enter your password..."
                     onChangeText={setPassword}
                     editable={!loading}
                   />
@@ -369,7 +373,7 @@ export default function GetStartedLoginScreen() {
                     fontWeight: "bold",
                     textDecorationLine: "underline",
                   }}
-                  onPress={onSignUp}
+                  onPress={() => router.push('/signup_screen')}
                 >
                   Sign up
                 </Text>
@@ -492,7 +496,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 17,
+    height: 55,
     fontSize: 16,
     color: "#000",
     backgroundColor: "transparent",

@@ -30,12 +30,11 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
-        <Stack.Screen name="splash_screen.tsx"/>
-        {/* Add your other screens like "login", "profile", etc. */}
+      <Stack initialRouteName="splash_screen" 
+      screenOptions={{ headerShown: false }}>
+        {/* <Stack.Screen name="splash_screen.tsx"/> */}
+        <Stack.Screen name="signup_screen" />
       </Stack>
-      <StatusBar style="auto" />
     </ThemeProvider>
   );
 }
