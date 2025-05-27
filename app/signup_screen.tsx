@@ -24,7 +24,7 @@ import Animated, {
 
 const { height, width } = Dimensions.get("window");
 
-type FormFields = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword';
+type FormFields = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword' | 'phone';
 
 export default function GetStartedScreen() {
   const router = useRouter();
@@ -33,6 +33,7 @@ export default function GetStartedScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -41,6 +42,7 @@ export default function GetStartedScreen() {
     firstName: false,
     lastName: false,
     email: false,
+    phone: false,
     password: false,
     confirmPassword: false,
   });
@@ -91,6 +93,9 @@ export default function GetStartedScreen() {
       case 'email':
         const emailRegex = /\S+@\S+\.\S+/;
         return !emailRegex.test(value);
+      case 'phone':
+        const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+        return !phoneRegex.test(value);
       case 'password':
         return !value || value.length < 6;
       case 'confirmPassword':
@@ -111,14 +116,17 @@ export default function GetStartedScreen() {
       firstName: true,
       lastName: true,
       email: true,
+      phone: true,
       password: true,
       confirmPassword: true,
     });
 
     const emailRegex = /\S+@\S+\.\S+/;
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
     return !firstName.trim() || 
            !lastName.trim() || 
-           !emailRegex.test(email) || 
+           !emailRegex.test(email) ||
+           !phoneRegex.test(phone) ||
            !password || 
            password.length < 6 || 
            password !== confirmPassword;
@@ -135,10 +143,14 @@ export default function GetStartedScreen() {
       // Replace this with your actual signup API call
       await new Promise((res) => setTimeout(res, 1500));
 
-      // Navigate to OTP screen with email
+      // Navigate to phone OTP verification first
       router.push({
-        pathname: "/email_otp",
-        params: { email: email }
+        pathname: "/phone_otp",
+        params: { 
+          phone: phone,
+          purpose: "signup",
+          email: email // Pass email for later use
+        }
       });
       
     } catch (e) {
@@ -168,6 +180,8 @@ export default function GetStartedScreen() {
         return lastName;
       case 'email':
         return email;
+      case 'phone':
+        return phone;
       case 'password':
         return password;
       case 'confirmPassword':
@@ -206,110 +220,127 @@ export default function GetStartedScreen() {
           showsVerticalScrollIndicator={false}
         >
           <BottomCard height={height * 0.78} title="Signup to continue">
-            <View style={styles.form}>
-              {/* First Name */}
-              <Text style={getLabelStyle('firstName')}>First Name <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={getInputStyle('firstName')}
-                placeholder="Enter your first name"
-                value={firstName}
-                onChangeText={setFirstName}
-                onBlur={() => handleBlur('firstName')}
-              />
-
-              {/* Last Name */}
-              <Text style={getLabelStyle('lastName')}>Last Name <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={getInputStyle('lastName')}
-                placeholder="Enter your last name"
-                value={lastName}
-                onChangeText={setLastName}
-                onBlur={() => handleBlur('lastName')}
-              />
-
-              {/* Email */}
-              <Text style={getLabelStyle('email')}>Email <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={getInputStyle('email')}
-                placeholder="Enter your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-                onBlur={() => handleBlur('email')}
-              />
-
-              {/* Password */}
-              <Text style={getLabelStyle('password')}>Password <Text style={styles.required}>*</Text></Text>
-              <View style={styles.inputWrapper}>
+            <ScrollView 
+              style={{ width: '100%' }}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20, marginTop: -5 }}
+            >
+              <View style={styles.form}>
+                {/* First Name */}
+                <Text style={getLabelStyle('firstName')}>First Name <Text style={styles.required}>*</Text></Text>
                 <TextInput
-                  style={getInputStyle('password')}
-                  placeholder="Enter password"
-                  secureTextEntry={!showPassword}
-                  value={password}
-                  onChangeText={setPassword}
-                  onBlur={() => handleBlur('password')}
+                  style={getInputStyle('firstName')}
+                  placeholder="Enter your first name"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  onBlur={() => handleBlur('firstName')}
                 />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={styles.eyeIcon}
-                >
-                  <MaterialIcons
-                    name={showPassword ? "visibility-off" : "visibility"}
-                    size={25}
-                    color="#888"
-                  />
-                </TouchableOpacity>
-              </View>
 
-              {/* Confirm Password */}
-              <Text style={getLabelStyle('confirmPassword')}>Confirm Password <Text style={styles.required}>*</Text></Text>
-              <View style={styles.inputWrapper}>
+                {/* Last Name */}
+                <Text style={getLabelStyle('lastName')}>Last Name <Text style={styles.required}>*</Text></Text>
                 <TextInput
-                  style={getInputStyle('confirmPassword')}
-                  placeholder="Confirm password"
-                  secureTextEntry={!showConfirmPassword}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  onBlur={() => handleBlur('confirmPassword')}
+                  style={getInputStyle('lastName')}
+                  placeholder="Enter your last name"
+                  value={lastName}
+                  onChangeText={setLastName}
+                  onBlur={() => handleBlur('lastName')}
                 />
-                <TouchableOpacity
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={styles.eyeIcon}
-                >
-                  <MaterialIcons
-                    name={showConfirmPassword ? "visibility-off" : "visibility"}
-                    size={25}
-                    color="#888"
+
+                {/* Email */}
+                <Text style={getLabelStyle('email')}>Email <Text style={styles.required}>*</Text></Text>
+                <TextInput
+                  style={getInputStyle('email')}
+                  placeholder="Enter your email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                  onBlur={() => handleBlur('email')}
+                />
+
+                {/* Phone */}
+                <Text style={getLabelStyle('phone')}>Phone Number <Text style={styles.required}>*</Text></Text>
+                <TextInput
+                  style={getInputStyle('phone')}
+                  placeholder="Enter your phone number"
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
+                  onBlur={() => handleBlur('phone')}
+                />
+
+                {/* Password */}
+                <Text style={getLabelStyle('password')}>Password <Text style={styles.required}>*</Text></Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={getInputStyle('password')}
+                    placeholder="Enter password"
+                    secureTextEntry={!showPassword}
+                    value={password}
+                    onChangeText={setPassword}
+                    onBlur={() => handleBlur('password')}
                   />
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    <MaterialIcons
+                      name={showPassword ? "visibility-off" : "visibility"}
+                      size={25}
+                      color="#888"
+                    />
+                  </TouchableOpacity>
+                </View>
 
-              {/* Error Message */}
-              {error && <Text style={styles.errorText}>{error}</Text>}
+                {/* Confirm Password */}
+                <Text style={getLabelStyle('confirmPassword')}>Confirm Password <Text style={styles.required}>*</Text></Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={getInputStyle('confirmPassword')}
+                    placeholder="Confirm password"
+                    secureTextEntry={!showConfirmPassword}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    onBlur={() => handleBlur('confirmPassword')}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    <MaterialIcons
+                      name={showConfirmPassword ? "visibility-off" : "visibility"}
+                      size={25}
+                      color="#888"
+                    />
+                  </TouchableOpacity>
+                </View>
 
-              {/* Sign Up Button */}
-              <TouchableOpacity
-                style={[styles.signupButton, loading && { opacity: 0.6 }]}
-                onPress={handleSignUp}
-                disabled={loading}
-              >
-                <Text style={styles.signupButtonText}>
-                  {loading ? "Signing Up..." : "Sign Up"}
-                </Text>
-              </TouchableOpacity>
+                {/* Error Message */}
+                {error && <Text style={styles.errorText}>{error}</Text>}
 
-              {/* Footer Text */}
-              <Text style={styles.footerText}>
-                Already have an account?{" "}
-                <Text
-                  style={styles.footerLink}
-                  onPress={() => router.push("/splash_screen")}
+                {/* Sign Up Button */}
+                <TouchableOpacity
+                  style={[styles.signupButton, loading && { opacity: 0.6 }]}
+                  onPress={handleSignUp}
+                  disabled={loading}
                 >
-                  Login
+                  <Text style={styles.signupButtonText}>
+                    {loading ? "Signing Up..." : "Sign Up"}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Footer Text */}
+                <Text style={styles.footerText}>
+                  Already have an account?{" "}
+                  <Text
+                    style={styles.footerLink}
+                    onPress={() => router.push("/splash_screen")}
+                  >
+                    Login
+                  </Text>
                 </Text>
-              </Text>
-            </View>
+              </View>
+            </ScrollView>
           </BottomCard>
         </ScrollView>
       </Animated.View>
@@ -336,11 +367,13 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsSemiBold",
   },
   headingHighlight: {
-    color: "#662D99",
+    color: "#02D1FF",
     fontFamily: "PoppinsExtraBold",
+    fontSize: 40,
   },
   form: {
-    marginTop: -10,
+    marginTop: 5,
+    paddingHorizontal: 5,
   },
   label: {
     fontSize: 16,

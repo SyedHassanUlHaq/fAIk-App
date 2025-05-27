@@ -192,7 +192,7 @@ export default function GetStartedLoginScreen() {
 
   // === BUTTON HANDLERS ===
   const onForgotPassword = () => {
-    Alert.alert("Forgot Password", "Navigate to forgot password screen");
+    router.push("/forgot_password");
   };
 
   const onGoogleSignIn = () => {
@@ -366,7 +366,7 @@ export default function GetStartedLoginScreen() {
 
               {/* Footer */}
               <Text style={styles.footerText}>
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <Text
                   style={{
                     color: "#02D1FF",

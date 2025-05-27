@@ -3,57 +3,45 @@ import {
   View,
   Text,
   TouchableOpacity,
+  ImageBackground,
   StyleSheet,
   Dimensions,
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
-  ImageBackground,
+  KeyboardAvoidingView,
   ActivityIndicator,
   Alert,
-  Keyboard,
 } from "react-native";
 import BottomCard from "../components/universal_card";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { OtpInput } from "react-native-otp-entry";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { OtpInput } from "react-native-otp-entry";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { height } = Dimensions.get("window");
 
-export default function EmailOtpScreen() {
+export default function ForgotPassOtpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const userEmail = params.email as string;
+
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(true);
   const [countdown, setCountdown] = useState(30);
   const keyboardHeight = useSharedValue(0);
-  const userEmail = params.email as string || "your email";
-
-  // Countdown timer for resend button
-  useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (countdown > 0 && resendDisabled) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    } else {
-      setResendDisabled(false);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [countdown, resendDisabled]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       (e) => {
-        keyboardHeight.value = withTiming(e.endCoordinates.height, { duration: 300 });
+        keyboardHeight.value = withTiming(e.endCoordinates.height, {
+          duration: 300,
+        });
       }
     );
     const hideSub = Keyboard.addListener(
@@ -69,9 +57,66 @@ export default function EmailOtpScreen() {
     };
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -keyboardHeight.value }],
-  }));
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval>;
+    if (countdown > 0 && resendDisabled) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setResendDisabled(false);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [countdown, resendDisabled]);
+
+  const handleVerify = async () => {
+    if (otp.length !== 6) {
+      Alert.alert("Invalid OTP", "Please enter a valid 6-digit OTP.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // For testing: accept 000000 as valid OTP
+      if (otp === "000000") {
+        // Navigate to reset password screen 
+        router.push({
+          pathname: "/reset_password",
+          params: { email: userEmail }
+        });
+        return;
+      }
+
+      // Regular API verification
+      const response = await fetch("https://your-api.com/verify-forgot-password-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          otp: otp,
+        }),
+      });
+
+      if (response.ok) {
+        // Navigate to reset password screen
+        router.push({
+          pathname: "/reset_password",
+          params: { email: userEmail }
+        });
+      } else {
+        throw new Error("Invalid OTP");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Invalid OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleResendOTP = async () => {
     setResendDisabled(true);
@@ -79,8 +124,7 @@ export default function EmailOtpScreen() {
     setLoading(true);
 
     try {
-      // Dummy API call - Replace with actual API endpoint
-      const response = await fetch("https://your-api.com/resend-otp", {
+      const response = await fetch("https://your-api.com/resend-forgot-password-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -104,51 +148,15 @@ export default function EmailOtpScreen() {
     }
   };
 
-  const handleVerify = async () => {
-    if (otp.length !== 6) {
-      Alert.alert("Invalid OTP", "Please enter a valid 6-digit OTP.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Dummy API call - Replace with actual API endpoint
-      const response = await fetch("https://your-api.com/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: userEmail,
-          otp: otp,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Store the JWT token
-        await AsyncStorage.setItem("jwt_token", data.token);
-        Alert.alert("Success", "Email verified successfully!", [
-          {
-            text: "Continue",
-            onPress: () => router.push("/splash_screen"),
-          },
-        ]);
-      } else {
-        throw new Error("Invalid OTP");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Invalid OTP. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -keyboardHeight.value }],
+  }));
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
       <ImageBackground
         source={require("../assets/images/signup-bg.jpg")}
@@ -191,7 +199,11 @@ export default function EmailOtpScreen() {
               />
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleVerify} disabled={loading}>
+            <TouchableOpacity
+              style={[styles.button, loading && { opacity: 0.6 }]}
+              onPress={handleVerify}
+              disabled={loading || otp.length !== 6}
+            >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
