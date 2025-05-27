@@ -1,27 +1,42 @@
-import React, { useState, useEffect } from "react";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-  View,
+  Dimensions,
+  ImageBackground,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ImageBackground,
-  StyleSheet,
-  Dimensions,
-  Keyboard,
-  Platform,
-  KeyboardAvoidingView,
-  ScrollView,
+  View,
 } from "react-native";
-import BottomCard from "../components/universal_card";
-import { useRouter } from "expo-router";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import BottomCard from "../components/universal_card";
+import { API_BASE_URL, handleApiError, storeToken } from "./utils/api";
 
 const { height, width } = Dimensions.get("window");
+
+interface ValidationErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+interface PasswordStrength {
+  score: number;
+  label: string;
+  color: string;
+}
 
 export default function GetStartedScreen() {
   const router = useRouter();
@@ -40,6 +55,12 @@ export default function GetStartedScreen() {
   const [loading, setLoading] = useState(false);
 
   const keyboardHeight = useSharedValue(0);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>({
+    score: 0,
+    label: "Too Weak",
+    color: "#ff3b30"
+  });
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
@@ -69,20 +90,109 @@ export default function GetStartedScreen() {
   }));
 
   function validateForm() {
-    if (!firstName.trim()) return "First name is required";
-    if (!lastName.trim()) return "Last name is required";
-    if (!email.trim()) return "Email is required";
+    const errors: ValidationErrors = {};
+    
+    // First Name validation
+    if (!firstName.trim()) {
+      errors.firstName = "First name is required";
+    } else if (firstName.length < 2) {
+      errors.firstName = "First name must be at least 2 characters";
+    } else if (firstName.length > 50) {
+      errors.firstName = "First name must be less than 50 characters";
+    } else if (!/^[a-zA-Z\s-']+$/.test(firstName)) {
+      errors.firstName = "First name can only contain letters, spaces, hyphens, and apostrophes";
+    }
 
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(email)) return "Email is invalid";
+    // Last Name validation
+    if (!lastName.trim()) {
+      errors.lastName = "Last name is required";
+    } else if (lastName.length < 2) {
+      errors.lastName = "Last name must be at least 2 characters";
+    } else if (lastName.length > 50) {
+      errors.lastName = "Last name must be less than 50 characters";
+    } else if (!/^[a-zA-Z\s-']+$/.test(lastName)) {
+      errors.lastName = "Last name can only contain letters, spaces, hyphens, and apostrophes";
+    }
 
-    if (!password) return "Password is required";
-    if (password.length < 6)
-      return "Password must be at least 6 characters long";
-    if (password !== confirmPassword) return "Passwords do not match";
+    // Email validation
+    if (!email.trim()) {
+      errors.email = "Email is required";
+    } else {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        errors.email = "Please enter a valid email address";
+      }
+    }
 
-    return null;
+    // Password validation
+    if (!password) {
+      errors.password = "Password is required";
+    } else {
+      if (password.length < 8) {
+        errors.password = "Password must be at least 8 characters long";
+      } else if (!/[A-Z]/.test(password)) {
+        errors.password = "Password must contain at least one uppercase letter";
+      } else if (!/[a-z]/.test(password)) {
+        errors.password = "Password must contain at least one lowercase letter";
+      } else if (!/[0-9]/.test(password)) {
+        errors.password = "Password must contain at least one number";
+      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        errors.password = "Password must contain at least one special character";
+      }
+    }
+
+    // Confirm Password validation
+    if (!confirmPassword) {
+      errors.confirmPassword = "Please confirm your password";
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0 ? null : "Please fix the errors in the form";
   }
+
+  const calculatePasswordStrength = (password: string): PasswordStrength => {
+    if (!password) {
+      return { score: 0, label: "Too Weak", color: "#ff3b30" };
+    }
+
+    let score = 0;
+    
+    // Length check
+    if (password.length >= 8) score += 1;
+    if (password.length >= 12) score += 1;
+    
+    // Character type checks
+    if (/[A-Z]/.test(password)) score += 1;
+    if (/[a-z]/.test(password)) score += 1;
+    if (/[0-9]/.test(password)) score += 1;
+    if (/[^A-Za-z0-9]/.test(password)) score += 1;
+    
+    // Complexity check
+    if (password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password)) {
+      score += 1;
+    }
+
+    // Determine strength level
+    if (score <= 2) {
+      return { score, label: "Too Weak", color: "#ff3b30" };
+    } else if (score <= 4) {
+      return { score, label: "Weak", color: "#ff9500" };
+    } else if (score <= 6) {
+      return { score, label: "Medium", color: "#ffcc00" };
+    } else if (score <= 8) {
+      return { score, label: "Strong", color: "#34c759" };
+    } else {
+      return { score, label: "Very Strong", color: "#30b0c7" };
+    }
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    setPasswordStrength(calculatePasswordStrength(text));
+    setValidationErrors(prev => ({ ...prev, password: undefined }));
+  };
 
   async function handleSignUp() {
     const errorMessage = validateForm();
@@ -95,13 +205,37 @@ export default function GetStartedScreen() {
     setLoading(true);
 
     try {
-      // Replace this with your actual signup API call
-      await new Promise((res) => setTimeout(res, 1500));
+      const response = await fetch(`${API_BASE_URL}/auth/signup/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          first_name: firstName,
+          last_name: lastName,
+        }),
+      });
 
-      // Navigate on success
-      router.push("/splash_screen"); // Change to your desired screen
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw {
+          response: {
+            data: data
+          }
+        };
+      }
+
+      if (data.token) {
+        await storeToken(data.token);
+      }
+      
+      router.push("/splash_screen");
     } catch (e) {
-      setError("Signup failed. Please try again.");
+      const errorMessage = handleApiError(e);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -140,41 +274,59 @@ export default function GetStartedScreen() {
               {/* First Name */}
               <Text style={styles.label}>First Name</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, validationErrors.firstName && styles.inputError]}
                 placeholder="Enter your first name"
                 value={firstName}
-                onChangeText={setFirstName}
+                onChangeText={(text) => {
+                  setFirstName(text);
+                  setValidationErrors(prev => ({ ...prev, firstName: undefined }));
+                }}
               />
+              {validationErrors.firstName && (
+                <Text style={styles.errorText}>{validationErrors.firstName}</Text>
+              )}
 
               {/* Last Name */}
               <Text style={styles.label}>Last Name</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, validationErrors.lastName && styles.inputError]}
                 placeholder="Enter your last name"
                 value={lastName}
-                onChangeText={setLastName}
+                onChangeText={(text) => {
+                  setLastName(text);
+                  setValidationErrors(prev => ({ ...prev, lastName: undefined }));
+                }}
               />
+              {validationErrors.lastName && (
+                <Text style={styles.errorText}>{validationErrors.lastName}</Text>
+              )}
 
               {/* Email */}
               <Text style={styles.label}>Email</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, validationErrors.email && styles.inputError]}
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  setValidationErrors(prev => ({ ...prev, email: undefined }));
+                }}
               />
+              {validationErrors.email && (
+                <Text style={styles.errorText}>{validationErrors.email}</Text>
+              )}
 
               {/* Password */}
               <Text style={styles.label}>Password</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, validationErrors.password && styles.inputError]}
                   placeholder="Enter password"
                   secureTextEntry={!showPassword}
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={handlePasswordChange}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
@@ -187,16 +339,41 @@ export default function GetStartedScreen() {
                   />
                 </TouchableOpacity>
               </View>
+              
+              {/* Password Strength Indicator */}
+              <View style={styles.strengthContainer}>
+                <View style={styles.strengthMeter}>
+                  <View 
+                    style={[
+                      styles.strengthBar, 
+                      { 
+                        width: `${(passwordStrength.score / 8) * 100}%`,
+                        backgroundColor: passwordStrength.color 
+                      }
+                    ]} 
+                  />
+                </View>
+                <Text style={[styles.strengthText, { color: passwordStrength.color }]}>
+                  {passwordStrength.label}
+                </Text>
+              </View>
+
+              {validationErrors.password && (
+                <Text style={styles.errorText}>{validationErrors.password}</Text>
+              )}
 
               {/* Confirm Password */}
               <Text style={styles.label}>Confirm Password</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, validationErrors.confirmPassword && styles.inputError]}
                   placeholder="Confirm password"
                   secureTextEntry={!showConfirmPassword}
                   value={confirmPassword}
-                  onChangeText={setConfirmPassword}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text);
+                    setValidationErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                  }}
                 />
                 <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -209,13 +386,16 @@ export default function GetStartedScreen() {
                   />
                 </TouchableOpacity>
               </View>
+              {validationErrors.confirmPassword && (
+                <Text style={styles.errorText}>{validationErrors.confirmPassword}</Text>
+              )}
 
-              {/* Error Message */}
+              {/* General Error Message */}
               {error && <Text style={styles.errorText}>{error}</Text>}
 
               {/* Sign Up Button */}
               <TouchableOpacity
-                style={[styles.signupButton, loading && { opacity: 0.6 }]}
+                style={[styles.signupButton, loading && styles.signupButtonDisabled]}
                 onPress={handleSignUp}
                 disabled={loading}
               >
@@ -316,10 +496,39 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textDecorationLine: "underline",
   },
+  inputError: {
+    borderColor: '#ff3b30',
+    borderWidth: 1,
+  },
   errorText: {
-    color: "red",
-    textAlign: "center",
+    color: '#ff3b30',
+    fontSize: 12,
+    marginTop: -10,
     marginBottom: 10,
-    fontFamily: "PoppinsSemiBold",
+    marginLeft: 5,
+    fontFamily: "PoppinsRegular",
+  },
+  signupButtonDisabled: {
+    opacity: 0.6,
+  },
+  strengthContainer: {
+    marginTop: -10,
+    marginBottom: 15,
+  },
+  strengthMeter: {
+    height: 4,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  strengthBar: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  strengthText: {
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 5,
+    fontFamily: "PoppinsMedium",
   },
 });

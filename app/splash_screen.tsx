@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from "react";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
+import React, { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  ImageBackground,
+  Keyboard,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
-  ImageBackground,
-  StyleSheet,
-  Dimensions,
-  Keyboard,
-  Platform,
-  Alert,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage'; // For saving JWT token
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  useAnimatedGestureHandler,
-} from "react-native-reanimated";
 import {
-  PanGestureHandler,
   GestureHandlerRootView,
+  PanGestureHandler,
   PanGestureHandlerGestureEvent,
 } from "react-native-gesture-handler";
-import LottieView from "lottie-react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useRouter } from "expo-router";
+import Animated, {
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { API_BASE_URL, handleApiError, storeToken } from "./utils/api";
 
 const { height } = Dimensions.get("window");
 const router = useRouter();
@@ -163,28 +163,49 @@ export default function GetStartedLoginScreen() {
 
     setLoading(true);
     try {
-      const response = await fetch("https://your-api-url.com/login", {
+      console.log('Attempting login with:', { email });
+      
+      // Create form data as required by OAuth2PasswordRequestForm
+      const formData = new FormData();
+      formData.append('username', email); // OAuth2 uses 'username' field for email
+      formData.append('password', password);
+
+      console.log('Sending request to:', `${API_BASE_URL}/auth/login/`);
+
+      const response = await fetch(`${API_BASE_URL}/auth/login/`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Accept": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: formData,
       });
 
-      if (response.status === 200) {
-        const data = await response.json();
-        // Assuming the token is in data.token
-        await AsyncStorage.setItem("jwt_token", data.token);
+      const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response data:', data);
 
-        // Navigate to your app's main screen or update auth state here
-        Alert.alert("Success", "Logged in successfully!");
-      } else if (response.status === 401) {
-        setErrorMsg("Invalid credentials.");
+      if (!response.ok) {
+        throw {
+          response: {
+            data: data
+          }
+        };
+      }
+
+      // Store the token
+      if (data.access_token) {
+        console.log('Token received, storing...');
+        await storeToken(data.access_token);
+        console.log('Token stored successfully');
+        // Navigate to main app screen
+        router.push("/splash_screen");
       } else {
-        setErrorMsg("Login failed. Please try again.");
+        throw new Error("No access token received");
       }
     } catch (error) {
-      setErrorMsg("Network error. Please try again.");
+      console.error('Login error:', error);
+      const errorMessage = handleApiError(error);
+      setErrorMsg(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -202,8 +223,6 @@ export default function GetStartedLoginScreen() {
   const onSignUp = () => {
     Alert.alert("Sign Up", "Navigate to signup screen");
   };
-
-
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -366,7 +385,7 @@ export default function GetStartedLoginScreen() {
 
               {/* Footer */}
               <Text style={styles.footerText}>
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <Text
                   style={{
                     color: "#02D1FF",
