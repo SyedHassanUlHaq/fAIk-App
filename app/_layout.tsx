@@ -34,6 +34,7 @@ export default function RootLayout() {
       screenOptions={{ headerShown: false }}>
         {/* <Stack.Screen name="splash_screen.tsx"/> */}
         <Stack.Screen name="signup_screen" />
+        <Stack.Screen name="email_otp" />
       </Stack>
     </ThemeProvider>
   );
