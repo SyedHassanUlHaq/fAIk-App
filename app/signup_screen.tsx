@@ -11,6 +11,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  Alert,
 } from "react-native";
 import BottomCard from "../components/universal_card";
 import { useRouter } from "expo-router";
@@ -23,6 +24,8 @@ import Animated, {
 
 const { height, width } = Dimensions.get("window");
 
+type FormFields = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword';
+
 export default function GetStartedScreen() {
   const router = useRouter();
 
@@ -32,6 +35,15 @@ export default function GetStartedScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Validation state
+  const [touchedFields, setTouchedFields] = useState<Record<FormFields, boolean>>({
+    firstName: false,
+    lastName: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -68,44 +80,102 @@ export default function GetStartedScreen() {
     flex: 1,
   }));
 
+  // Helper function to check if a field is invalid
+  const isFieldInvalid = (field: FormFields, value: string) => {
+    if (!touchedFields[field]) return false;
+    
+    switch (field) {
+      case 'firstName':
+      case 'lastName':
+        return !value.trim();
+      case 'email':
+        const emailRegex = /\S+@\S+\.\S+/;
+        return !emailRegex.test(value);
+      case 'password':
+        return !value || value.length < 6;
+      case 'confirmPassword':
+        return !value || value !== password;
+      default:
+        return false;
+    }
+  };
+
+  // Handle field blur
+  const handleBlur = (field: FormFields) => {
+    setTouchedFields(prev => ({ ...prev, [field]: true }));
+  };
+
   function validateForm() {
-    if (!firstName.trim()) return "First name is required";
-    if (!lastName.trim()) return "Last name is required";
-    if (!email.trim()) return "Email is required";
+    // Mark all fields as touched
+    setTouchedFields({
+      firstName: true,
+      lastName: true,
+      email: true,
+      password: true,
+      confirmPassword: true,
+    });
 
     const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(email)) return "Email is invalid";
-
-    if (!password) return "Password is required";
-    if (password.length < 6)
-      return "Password must be at least 6 characters long";
-    if (password !== confirmPassword) return "Passwords do not match";
-
-    return null;
+    return !firstName.trim() || 
+           !lastName.trim() || 
+           !emailRegex.test(email) || 
+           !password || 
+           password.length < 6 || 
+           password !== confirmPassword;
   }
 
   async function handleSignUp() {
-    const errorMessage = validateForm();
-    if (errorMessage) {
-      setError(errorMessage);
+    if (validateForm()) {
       return;
     }
 
-    setError(null);
     setLoading(true);
 
     try {
       // Replace this with your actual signup API call
       await new Promise((res) => setTimeout(res, 1500));
 
-      // Navigate on success
-      router.push("/splash_screen"); // Change to your desired screen
+      // Navigate to OTP screen with email
+      router.push({
+        pathname: "/email_otp",
+        params: { email: email }
+      });
+      
     } catch (e) {
-      setError("Signup failed. Please try again.");
+      Alert.alert("Error", "Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
   }
+
+  // Style helper for labels and inputs
+  const getLabelStyle = (field: FormFields) => [
+    styles.label,
+    isFieldInvalid(field, getFieldValue(field)) && styles.labelError
+  ];
+
+  const getInputStyle = (field: FormFields) => [
+    styles.input,
+    isFieldInvalid(field, getFieldValue(field)) && styles.inputError
+  ];
+
+  // Helper to get field value
+  const getFieldValue = (field: FormFields): string => {
+    switch (field) {
+      case 'firstName':
+        return firstName;
+      case 'lastName':
+        return lastName;
+      case 'email':
+        return email;
+      case 'password':
+        return password;
+      case 'confirmPassword':
+        return confirmPassword;
+      default:
+        return '';
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -138,43 +208,47 @@ export default function GetStartedScreen() {
           <BottomCard height={height * 0.78} title="Signup to continue">
             <View style={styles.form}>
               {/* First Name */}
-              <Text style={styles.label}>First Name</Text>
+              <Text style={getLabelStyle('firstName')}>First Name <Text style={styles.required}>*</Text></Text>
               <TextInput
-                style={styles.input}
+                style={getInputStyle('firstName')}
                 placeholder="Enter your first name"
                 value={firstName}
                 onChangeText={setFirstName}
+                onBlur={() => handleBlur('firstName')}
               />
 
               {/* Last Name */}
-              <Text style={styles.label}>Last Name</Text>
+              <Text style={getLabelStyle('lastName')}>Last Name <Text style={styles.required}>*</Text></Text>
               <TextInput
-                style={styles.input}
+                style={getInputStyle('lastName')}
                 placeholder="Enter your last name"
                 value={lastName}
                 onChangeText={setLastName}
+                onBlur={() => handleBlur('lastName')}
               />
 
               {/* Email */}
-              <Text style={styles.label}>Email</Text>
+              <Text style={getLabelStyle('email')}>Email <Text style={styles.required}>*</Text></Text>
               <TextInput
-                style={styles.input}
+                style={getInputStyle('email')}
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
                 onChangeText={setEmail}
+                onBlur={() => handleBlur('email')}
               />
 
               {/* Password */}
-              <Text style={styles.label}>Password</Text>
+              <Text style={getLabelStyle('password')}>Password <Text style={styles.required}>*</Text></Text>
               <View style={styles.inputWrapper}>
                 <TextInput
-                  style={styles.input}
+                  style={getInputStyle('password')}
                   placeholder="Enter password"
                   secureTextEntry={!showPassword}
                   value={password}
                   onChangeText={setPassword}
+                  onBlur={() => handleBlur('password')}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
@@ -189,14 +263,15 @@ export default function GetStartedScreen() {
               </View>
 
               {/* Confirm Password */}
-              <Text style={styles.label}>Confirm Password</Text>
+              <Text style={getLabelStyle('confirmPassword')}>Confirm Password <Text style={styles.required}>*</Text></Text>
               <View style={styles.inputWrapper}>
                 <TextInput
-                  style={styles.input}
+                  style={getInputStyle('confirmPassword')}
                   placeholder="Confirm password"
                   secureTextEntry={!showConfirmPassword}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
+                  onBlur={() => handleBlur('confirmPassword')}
                 />
                 <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -321,5 +396,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 10,
     fontFamily: "PoppinsSemiBold",
+  },
+  labelError: {
+    color: '#FF3B30',
+  },
+  inputError: {
+    borderColor: '#FF3B30',
+  },
+  required: {
+    color: '#FF3B30',
+    fontSize: 16,
   },
 });
