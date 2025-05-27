@@ -24,7 +24,7 @@ import { API_BASE_URL, handleApiError, storeToken } from "./utils/api";
 
 const { height, width } = Dimensions.get("window");
 
-type FormFields = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword';
+type FormFields = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword' | 'phone';
 
 interface PasswordStrength {
   score: number;
@@ -38,6 +38,7 @@ interface ValidationErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
+  phone?: string;
 }
 
 export default function GetStartedScreen() {
@@ -47,6 +48,7 @@ export default function GetStartedScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -55,6 +57,7 @@ export default function GetStartedScreen() {
     firstName: false,
     lastName: false,
     email: false,
+    phone: false,
     password: false,
     confirmPassword: false,
   });
@@ -219,7 +222,7 @@ export default function GetStartedScreen() {
     let hasErrors = false;
 
     // Validate all fields
-    const fields: FormFields[] = ['firstName', 'lastName', 'email', 'password', 'confirmPassword'];
+    const fields: FormFields[] = ['firstName', 'lastName', 'email', 'phone', 'password', 'confirmPassword'];
     fields.forEach(field => {
       const value = getFieldValue(field);
       const error = validateField(field, value);
@@ -234,6 +237,7 @@ export default function GetStartedScreen() {
       firstName: true,
       lastName: true,
       email: true,
+      phone: true,
       password: true,
       confirmPassword: true,
     });
@@ -315,6 +319,8 @@ export default function GetStartedScreen() {
         return lastName;
       case 'email':
         return email;
+      case 'phone':
+        return phone;
       case 'password':
         return password;
       case 'confirmPassword':
@@ -404,6 +410,17 @@ export default function GetStartedScreen() {
                 value={email}
                 onChangeText={(text) => handleFieldChange('email', text)}
                 onBlur={() => handleBlur('email')}
+              />
+
+              {/* Phone */}
+              <Text style={getLabelStyle('phone')}>Phone Number <Text style={styles.required}>*</Text></Text>
+              <TextInput
+                style={getInputStyle('phone')}
+                placeholder="Enter your phone number"
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={(text) => handleFieldChange('phone', text)}
+                onBlur={() => handleBlur('phone')}
               />
 
               {/* Password */}
@@ -525,11 +542,13 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsSemiBold",
   },
   headingHighlight: {
-    color: "#662D99",
+    color: "#02D1FF",
     fontFamily: "PoppinsExtraBold",
+    fontSize: 40,
   },
   form: {
-    marginTop: -10,
+    marginTop: 5,
+    paddingHorizontal: 5,
   },
   label: {
     fontSize: 16,

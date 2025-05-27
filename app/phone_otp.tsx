@@ -3,57 +3,46 @@ import {
   View,
   Text,
   TouchableOpacity,
+  ImageBackground,
   StyleSheet,
   Dimensions,
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
-  ImageBackground,
+  KeyboardAvoidingView,
   ActivityIndicator,
   Alert,
-  Keyboard,
 } from "react-native";
 import BottomCard from "../components/universal_card";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { OtpInput } from "react-native-otp-entry";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { OtpInput } from "react-native-otp-entry";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { height } = Dimensions.get("window");
 
-export default function EmailOtpScreen() {
+export default function PhoneOtpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const userPhone = params.phone as string;
+  const purpose = params.purpose as string;
+
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(true);
   const [countdown, setCountdown] = useState(30);
   const keyboardHeight = useSharedValue(0);
-  const userEmail = params.email as string || "your email";
-
-  // Countdown timer for resend button
-  useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (countdown > 0 && resendDisabled) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    } else {
-      setResendDisabled(false);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [countdown, resendDisabled]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       (e) => {
-        keyboardHeight.value = withTiming(e.endCoordinates.height, { duration: 300 });
+        keyboardHeight.value = withTiming(e.endCoordinates.height, {
+          duration: 300,
+        });
       }
     );
     const hideSub = Keyboard.addListener(
@@ -69,86 +58,123 @@ export default function EmailOtpScreen() {
     };
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -keyboardHeight.value }],
-  }));
+  useEffect(() => {
+    startResendTimer();
+  }, []);
 
-  const handleResendOTP = async () => {
+  const startResendTimer = () => {
     setResendDisabled(true);
     setCountdown(30);
-    setLoading(true);
-
-    try {
-      // Dummy API call - Replace with actual API endpoint
-      const response = await fetch("https://your-api.com/resend-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: userEmail,
-        }),
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
       });
-
-      if (response.ok) {
-        Alert.alert("Success", "OTP has been resent to your email");
-      } else {
-        throw new Error("Failed to resend OTP");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to resend OTP. Please try again.");
-      setResendDisabled(false);
-      setCountdown(0);
-    } finally {
-      setLoading(false);
-    }
+    }, 1000);
   };
 
   const handleVerify = async () => {
-    if (otp.length !== 6) {
-      Alert.alert("Invalid OTP", "Please enter a valid 6-digit OTP.");
-      return;
-    }
+    if (otp.length !== 6) return;
 
     setLoading(true);
-
     try {
-      // Dummy API call - Replace with actual API endpoint
-      const response = await fetch("https://your-api.com/verify-otp", {
+      // Replace with your actual API endpoint
+      const response = await fetch("https://your-api.com/verify-phone-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: userEmail,
-          otp: otp,
+          phone: userPhone,
+          otp,
+          purpose,
         }),
       });
 
       if (response.ok) {
-        const data = await response.json();
-        // Store the JWT token
-        await AsyncStorage.setItem("jwt_token", data.token);
-        Alert.alert("Success", "Email verified successfully!", [
-          {
-            text: "Continue",
-            onPress: () => router.push("/splash_screen"),
-          },
-        ]);
+        if (purpose === "signup") {
+          // Complete the signup process
+          const signupResponse = await fetch("https://your-api.com/complete-signup", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: params.email,
+              phone: userPhone,
+              // Add any other signup data if needed
+            }),
+          });
+
+          if (signupResponse.ok) {
+            const data = await signupResponse.json();
+            // Store the JWT token
+            await AsyncStorage.setItem("jwt_token", data.token);
+            Alert.alert("Success", "Signup completed successfully!", [
+              {
+                text: "Continue",
+                onPress: () => router.push("/splash_screen"),
+              },
+            ]);
+          } else {
+            throw new Error("Failed to complete signup");
+          }
+        } else if (purpose === "reset_password") {
+        //   router.push({
+        //     pathname: "/reset_password",
+        //     params: { phone: userPhone },
+        //   });
+        }
       } else {
         throw new Error("Invalid OTP");
       }
     } catch (error) {
-      Alert.alert("Error", "Invalid OTP. Please try again.");
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Failed to verify OTP"
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResendOTP = async () => {
+    try {
+      // Replace with your actual API endpoint
+      const response = await fetch("https://your-api.com/resend-phone-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: userPhone,
+          purpose,
+        }),
+      });
+
+      if (response.ok) {
+        startResendTimer();
+      } else {
+        throw new Error("Failed to resend OTP");
+      }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to resend OTP");
+    }
+  };
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -keyboardHeight.value }],
+  }));
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
       <ImageBackground
         source={require("../assets/images/signup-bg.jpg")}
@@ -159,7 +185,7 @@ export default function EmailOtpScreen() {
       <Animated.View style={[styles.textContainer, animatedStyle]}>
         <Text style={styles.heading}>
           <Text style={styles.headingHighlight}>Verification.{"\n"}</Text>
-          Check your email{"\n"}
+          Check your phone{"\n"}
           for OTP!
         </Text>
       </Animated.View>
@@ -169,7 +195,7 @@ export default function EmailOtpScreen() {
           <View style={styles.inner}>
             <Text style={styles.instructions}>
               We've sent a verification code to{"\n"}
-              <Text style={styles.emailText}>{userEmail}</Text>
+              <Text style={styles.phoneText}>{userPhone}</Text>
             </Text>
 
             <View style={styles.otpContainer}>
@@ -191,7 +217,11 @@ export default function EmailOtpScreen() {
               />
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleVerify} disabled={loading}>
+            <TouchableOpacity
+              style={[styles.button, loading && { opacity: 0.6 }]}
+              onPress={handleVerify}
+              disabled={loading || otp.length !== 6}
+            >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
@@ -245,7 +275,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins",
     textAlign: "center"
   },
-  emailText: {
+  phoneText: {
     color: "#662D99",
     fontFamily: "PoppinsSemiBold",
   },

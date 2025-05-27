@@ -213,7 +213,7 @@ export default function GetStartedLoginScreen() {
 
   // === BUTTON HANDLERS ===
   const onForgotPassword = () => {
-    Alert.alert("Forgot Password", "Navigate to forgot password screen");
+    router.push("/forgot_password");
   };
 
   const onGoogleSignIn = () => {
