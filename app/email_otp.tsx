@@ -151,7 +151,7 @@ export default function EmailOtpScreen() {
       style={styles.container}
     >
       <ImageBackground
-        source={require("../assets/images/signup-bg.jpg")}
+        source={require("../assets/images/otp-bg.png")}
         style={[StyleSheet.absoluteFill, styles.backgroundImage]}
         resizeMode="cover"
       />
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   emailText: {
-    color: "#662D99",
+    color: "#FF2628",
     fontFamily: "PoppinsSemiBold",
   },
   otpContainer: {
@@ -284,10 +284,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
   activePinCodeContainer: {
-    borderColor: "#000",
+    borderColor: "#FF2628",
   },
   button: {
-    backgroundColor: "#662D99",
+    backgroundColor: "#FF2628",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",

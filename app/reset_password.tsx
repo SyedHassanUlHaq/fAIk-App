@@ -199,7 +199,7 @@ export default function ResetPasswordScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
       <ImageBackground
-        source={require("../assets/images/signup-bg.jpg")}
+        source={require("../assets/images/reset-pass-bg.png")}
         style={[StyleSheet.absoluteFill, styles.backgroundImage]}
         resizeMode="cover"
       />
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
     top: 12.5,
   },
   button: {
-    backgroundColor: "#662D99",
+    backgroundColor: "#FF2628",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
@@ -361,11 +361,11 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 30,
-    color: "white",
+    color: "#000000",
     fontFamily: "PoppinsSemiBold",
   },
   headingHighlight: {
-    color: "#02D1FF",
+    color: "#FF2628",
     fontFamily: "PoppinsExtraBold",
     fontSize: 40,
   },

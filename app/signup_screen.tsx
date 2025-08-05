@@ -23,7 +23,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import BottomCard from "../components/universal_card";
-import { API_BASE_URL, handleApiError, storeToken } from "./utils/api";
+import { API_BASE_URL, handleApiError, storeToken } from "../utils/api";
 
 const { height, width } = Dimensions.get("window");
 
@@ -342,6 +342,10 @@ export default function GetStartedScreen() {
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
+  // State for conditional rendering
+  const [showAsterisks, setShowAsterisks] = useState(false);
+  const [showPasswordStrength, setShowPasswordStrength] = useState(false);
+
   const [selectedCountry, setSelectedCountry] = useState<CountryData>(countries[0]);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
 
@@ -499,6 +503,12 @@ export default function GetStartedScreen() {
       case 'password':
         setPassword(value);
         setPasswordStrength(calculatePasswordStrength(value));
+        // Show password strength bar when password is entered
+        if (value.length > 0) {
+          setShowPasswordStrength(true);
+        } else {
+          setShowPasswordStrength(false);
+        }
         break;
       case 'confirmPassword':
         setConfirmPassword(value);
@@ -540,6 +550,9 @@ export default function GetStartedScreen() {
   }
 
   async function handleSignUp() {
+    // Show asterisks when signup button is clicked
+    setShowAsterisks(true);
+    
     if (validateForm()) {
       return;
     }
@@ -682,157 +695,151 @@ export default function GetStartedScreen() {
       style={styles.container}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
-      <Animated.View style={animatedStyle}>
-        <ImageBackground
-          source={require("../assets/images/signup-bg.jpg")}
-          style={[StyleSheet.absoluteFill, styles.backgroundImage]}
-          resizeMode="cover"
-        />
+              <Animated.View style={animatedStyle}>
+          <ImageBackground
+            source={require("../assets/images/signup-bg.png")}
+            style={[StyleSheet.absoluteFill, styles.backgroundImage]}
+            resizeMode="cover"
+          />
 
-        {/* Top Text Positioned Above the Card */}
-        <View style={styles.textContainer}>
-          <Text style={styles.heading}>
-            <Text style={styles.headingHighlight}>Signup.{"\n"}</Text>
-            See through AI{"\n"}
-            edits!
-          </Text>
-        </View>
+          {/* Top Text Positioned Above the Card */}
+          <View style={styles.textContainer}>
+            <Text style={styles.heading}>
+              <Text style={styles.headingHighlight}>Signup.{"\n"}</Text>
+              See through AI{"\n"}
+              edits!
+            </Text>
+          </View>
+        <BottomCard height={height * 0.78} title="Signup to continue">
+          <View style={styles.form}>
+            {/* First Name */}
+            <Text style={getLabelStyle('firstName')}>First Name {showAsterisks && <Text style={styles.required}>*</Text>}</Text>
+            <TextInput
+              style={getInputStyle('firstName')}
+              placeholder="Enter your first name"
+              value={firstName}
+              onChangeText={(text) => handleFieldChange('firstName', text)}
+              onBlur={() => handleBlur('firstName')}
+            />
 
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          scrollEnabled={true}
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
-          showsVerticalScrollIndicator={false}
-        >
-          <BottomCard height={height * 0.78} title="Signup to continue">
-            <View style={styles.form}>
-              {/* First Name */}
-              <Text style={getLabelStyle('firstName')}>First Name <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={getInputStyle('firstName')}
-                placeholder="Enter your first name"
-                value={firstName}
-                onChangeText={(text) => handleFieldChange('firstName', text)}
-                onBlur={() => handleBlur('firstName')}
-              />
+            {/* Last Name */}
+            <Text style={getLabelStyle('lastName')}>Last Name {showAsterisks && <Text style={styles.required}>*</Text>}</Text>
+            <TextInput
+              style={getInputStyle('lastName')}
+              placeholder="Enter your last name"
+              value={lastName}
+              onChangeText={(text) => handleFieldChange('lastName', text)}
+              onBlur={() => handleBlur('lastName')}
+            />
 
-              {/* Last Name */}
-              <Text style={getLabelStyle('lastName')}>Last Name <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={getInputStyle('lastName')}
-                placeholder="Enter your last name"
-                value={lastName}
-                onChangeText={(text) => handleFieldChange('lastName', text)}
-                onBlur={() => handleBlur('lastName')}
-              />
+            {/* Email */}
+            <Text style={getLabelStyle('email')}>Email {showAsterisks && <Text style={styles.required}>*</Text>}</Text>
+            <TextInput
+              style={getInputStyle('email')}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={(text) => handleFieldChange('email', text)}
+              onBlur={() => handleBlur('email')}
+            />
 
-              {/* Email */}
-              <Text style={getLabelStyle('email')}>Email <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={getInputStyle('email')}
-                placeholder="Enter your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={(text) => handleFieldChange('email', text)}
-                onBlur={() => handleBlur('email')}
-              />
-
-              {/* Phone */}
-              <Text style={getLabelStyle('phone')}>Phone Number <Text style={styles.required}>*</Text></Text>
-              <View style={styles.phoneInputContainer}>
-                <TouchableOpacity
-                  ref={countryPickerRef}
-                  style={styles.countryCodeButton}
-                  onPress={handleCountryPickerPress}
-                >
-                  <Text style={styles.countryFlag}>{selectedCountry.flag}</Text>
-                  <Text style={styles.countryCodeText}>
-                    +{selectedCountry.dialCode}
-                  </Text>
-                  <MaterialIcons name="arrow-drop-down" size={24} color="#000" />
-                </TouchableOpacity>
-                <TextInput
-                  style={[getInputStyle('phone'), styles.phoneInput]}
-                  placeholder="Enter your phone number"
-                  keyboardType="phone-pad"
-                  value={phone}
-                  onChangeText={(text) => handleFieldChange('phone', text)}
-                  onBlur={() => handleBlur('phone')}
-                  maxLength={10}
-                />
-              </View>
-
-              {/* Custom Country Picker Modal */}
-              <Modal
-                visible={showCountryPicker}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setShowCountryPicker(false)}
+            {/* Phone */}
+            <Text style={getLabelStyle('phone')}>Phone Number {showAsterisks && <Text style={styles.required}>*</Text>}</Text>
+            <View style={styles.phoneInputContainer}>
+              <TouchableOpacity
+                ref={countryPickerRef}
+                style={styles.countryCodeButton}
+                onPress={handleCountryPickerPress}
               >
-                <Pressable
-                  style={styles.modalOverlay}
-                  onPress={() => setShowCountryPicker(false)}
+                <Text style={styles.countryFlag}>{selectedCountry.flag}</Text>
+                <Text style={styles.countryCodeText}>
+                  +{selectedCountry.dialCode}
+                </Text>
+                <MaterialIcons name="arrow-drop-down" size={24} color="#000" />
+              </TouchableOpacity>
+              <TextInput
+                style={[getInputStyle('phone'), styles.phoneInput]}
+                placeholder="Enter your phone number"
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={(text) => handleFieldChange('phone', text)}
+                onBlur={() => handleBlur('phone')}
+                maxLength={10}
+              />
+            </View>
+
+            {/* Custom Country Picker Modal */}
+            <Modal
+              visible={showCountryPicker}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setShowCountryPicker(false)}
+            >
+              <Pressable
+                style={styles.modalOverlay}
+                onPress={() => setShowCountryPicker(false)}
+              >
+                <View
+                  style={[
+                    styles.countryPickerContainer,
+                    {
+                      top: pickerPosition.top,
+                      left: pickerPosition.left,
+                      width: Math.max(pickerPosition.width, 300)
+                    }
+                  ]}
                 >
-                  <View
-                    style={[
-                      styles.countryPickerContainer,
-                      {
-                        top: pickerPosition.top,
-                        left: pickerPosition.left,
-                        width: Math.max(pickerPosition.width, 300)
-                      }
-                    ]}
-                  >
-                    <View style={styles.searchContainer}>
-                      <MaterialIcons name="search" size={20} color="#666" />
-                      <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search country"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        autoCapitalize="none"
-                      />
-                    </View>
-                    <FlatList
-                      data={filteredCountries}
-                      renderItem={renderCountryItem}
-                      keyExtractor={(item) => item.code}
-                      style={styles.countryList}
-                      keyboardShouldPersistTaps="handled"
+                  <View style={styles.searchContainer}>
+                    <MaterialIcons name="search" size={20} color="#666" />
+                    <TextInput
+                      style={styles.searchInput}
+                      placeholder="Search country"
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                      autoCapitalize="none"
                     />
                   </View>
-                </Pressable>
-              </Modal>
-
-              {validationErrors.phone && (
-                <Text style={styles.errorText}>{validationErrors.phone}</Text>
-              )}
-
-              {/* Password */}
-              <Text style={getLabelStyle('password')}>Password <Text style={styles.required}>*</Text></Text>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={getInputStyle('password')}
-                  placeholder="Enter password"
-                  secureTextEntry={!showPassword}
-                  value={password}
-                  onChangeText={(text) => handleFieldChange('password', text)}
-                  onBlur={() => handleBlur('password')}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={styles.eyeIcon}
-                >
-                  <MaterialIcons
-                    name={showPassword ? "visibility-off" : "visibility"}
-                    size={25}
-                    color="#888"
+                  <FlatList
+                    data={filteredCountries}
+                    renderItem={renderCountryItem}
+                    keyExtractor={(item) => item.code}
+                    style={styles.countryList}
+                    keyboardShouldPersistTaps="handled"
                   />
-                </TouchableOpacity>
-              </View>
-              
-              {/* Password Strength Indicator */}
+                </View>
+              </Pressable>
+            </Modal>
+
+            {validationErrors.phone && (
+              <Text style={styles.errorText}>{validationErrors.phone}</Text>
+            )}
+
+            {/* Password */}
+            <Text style={getLabelStyle('password')}>Password {showAsterisks && <Text style={styles.required}>*</Text>}</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={getInputStyle('password')}
+                placeholder="Enter password"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={(text) => handleFieldChange('password', text)}
+                onBlur={() => handleBlur('password')}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
+              >
+                <MaterialIcons
+                  name={showPassword ? "visibility-off" : "visibility"}
+                  size={25}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
+            
+            {/* Password Strength Indicator */}
+            {showPasswordStrength && (
               <View style={styles.strengthContainer}>
                 <View style={styles.strengthMeter}>
                   <View 
@@ -849,61 +856,61 @@ export default function GetStartedScreen() {
                   {passwordStrength.label}
                 </Text>
               </View>
+            )}
 
-              {validationErrors.password && (
-                <Text style={styles.errorText}>{validationErrors.password}</Text>
-              )}
+            {validationErrors.password && (
+              <Text style={styles.errorText}>{validationErrors.password}</Text>
+            )}
 
-              {/* Confirm Password */}
-              <Text style={getLabelStyle('confirmPassword')}>Confirm Password <Text style={styles.required}>*</Text></Text>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={getInputStyle('confirmPassword')}
-                  placeholder="Confirm password"
-                  secureTextEntry={!showConfirmPassword}
-                  value={confirmPassword}
-                  onChangeText={(text) => handleFieldChange('confirmPassword', text)}
-                  onBlur={() => handleBlur('confirmPassword')}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={styles.eyeIcon}
-                >
-                  <MaterialIcons
-                    name={showConfirmPassword ? "visibility-off" : "visibility"}
-                    size={25}
-                    color="#888"
-                  />
-                </TouchableOpacity>
-              </View>
-
-              {/* Error Message */}
-              {error && <Text style={styles.errorText}>{error}</Text>}
-
-              {/* Sign Up Button */}
+            {/* Confirm Password */}
+            <Text style={getLabelStyle('confirmPassword')}>Confirm Password {showAsterisks && <Text style={styles.required}>*</Text>}</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={getInputStyle('confirmPassword')}
+                placeholder="Confirm password"
+                secureTextEntry={!showConfirmPassword}
+                value={confirmPassword}
+                onChangeText={(text) => handleFieldChange('confirmPassword', text)}
+                onBlur={() => handleBlur('confirmPassword')}
+              />
               <TouchableOpacity
-                style={[styles.signupButton, loading && { opacity: 0.6 }]}
-                onPress={handleSignUp}
-                disabled={loading}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={styles.eyeIcon}
               >
-                <Text style={styles.signupButtonText}>
-                  {loading ? "Signing Up..." : "Sign Up"}
-                </Text>
+                <MaterialIcons
+                  name={showConfirmPassword ? "visibility-off" : "visibility"}
+                  size={25}
+                  color="#888"
+                />
               </TouchableOpacity>
-
-              {/* Footer Text */}
-              <Text style={styles.footerText}>
-                Already have an account?{" "}
-                <Text
-                  style={styles.footerLink}
-                  onPress={() => router.push("/splash_screen")}
-                >
-                  Login
-                </Text>
-              </Text>
             </View>
-          </BottomCard>
-        </ScrollView>
+
+            {/* Error Message */}
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            {/* Sign Up Button */}
+            <TouchableOpacity
+              style={[styles.signupButton, loading && { opacity: 0.6 }]}
+              onPress={handleSignUp}
+              disabled={loading}
+            >
+              <Text style={styles.signupButtonText}>
+                {loading ? "Signing Up..." : "Sign Up"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Footer Text */}
+            <Text style={styles.footerText}>
+              Already have an account?{" "}
+              <Text
+                style={styles.footerLink}
+                onPress={() => router.push("/splash_screen")}
+              >
+                Login
+              </Text>
+            </Text>
+          </View>
+        </BottomCard>
       </Animated.View>
     </KeyboardAvoidingView>
   );
@@ -924,11 +931,11 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 30,
-    color: "white",
+    color: "#000000",
     fontFamily: "PoppinsSemiBold",
   },
   headingHighlight: {
-    color: "#02D1FF",
+    color: "#FF2628",
     fontFamily: "PoppinsExtraBold",
     fontSize: 40,
   },
@@ -962,7 +969,7 @@ const styles = StyleSheet.create({
     top: 12.5,
   },
   signupButton: {
-    backgroundColor: "#662D99",
+    backgroundColor: "#FF2628",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
@@ -981,7 +988,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   footerLink: {
-    color: "#02D1FF",
+    color: "#FF2628",
     fontWeight: "bold",
     textDecorationLine: "underline",
   },

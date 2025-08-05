@@ -27,7 +27,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { API_BASE_URL, handleApiError, storeToken } from "./utils/api";
+import { API_BASE_URL, handleApiError, storeToken } from "../utils/api";
 
 const { height } = Dimensions.get("window");
 const router = useRouter();
@@ -248,13 +248,13 @@ export default function GetStartedLoginScreen() {
                   <Text
                     style={{
                       fontSize: 35,
-                      color: "white",
+                      color: "#000000",
                       fontFamily: "PoppinsSemiBold",
                     }}
                   >
                     <Text
                       style={{
-                        color: "#02D1FF",
+                        color: "#FF2628",
                         fontFamily: "PoppinsExtraBold",
                       }}
                     >
@@ -271,19 +271,19 @@ export default function GetStartedLoginScreen() {
                   style={[{ paddingHorizontal: 20, bottom: 50 }, animatedNewTextOpacity]}
                 >
                   <Text style={{ fontSize: 35, fontFamily: "PoppinsExtraBold" }}>
-                    <Text style={{ color: "#02D1FF" }}>Hello.</Text>
+                    <Text style={{ color: "#FF2628" }}>Hello.</Text>
                     {"\n"}
-                    <Text style={{ color: "white" }}>Welcome back!</Text>
+                    <Text style={{ color: "#000000" }}>Welcome back!</Text>
                   </Text>
                 </Animated.View>
               </Animated.View>
 
               <Animated.View style={[styles.lottieWrapper, animatedLottieStyle]}>
                 <LottieView
-                  source={require("../assets/animations/swipe-up-fast.json")}
+                  source={require("../assets/animations/swipe_up_black_fast.json")}
                   autoPlay
                   loop
-                  speed={1}
+                  speed={2}
                   style={styles.lottie}
                 />
               </Animated.View>
@@ -388,7 +388,7 @@ export default function GetStartedLoginScreen() {
                 Don't have an account?{" "}
                 <Text
                   style={{
-                    color: "#02D1FF",
+                    color: "#FF2628",
                     fontWeight: "bold",
                     textDecorationLine: "underline",
                   }}
@@ -448,6 +448,12 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
     padding: 19,
     zIndex: 2,
+    // Add border that follows the curved corners
+    borderWidth: 2,
+    borderColor: "#FF2628",
+    borderBottomWidth: 0,
+    borderLeftWidth: 0.5,
+    borderRightWidth: 0.5,
   },
   dragHandle: {
     width: 60,
@@ -533,7 +539,7 @@ const styles = StyleSheet.create({
   },
 
   loginButton: {
-    backgroundColor: "#662D99", // purple
+    backgroundColor: "#FF2628", // purple
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
