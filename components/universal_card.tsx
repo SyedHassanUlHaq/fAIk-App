@@ -17,26 +17,32 @@ export default function BottomCard({
   height = screenHeight * 0.7,
   title = "",
   onBackPress,
+  showBack = true,
   children,
 }: {
   height?: number;
   title?: string;
   onBackPress?: () => void;
+  showBack?: boolean;
   children?: React.ReactNode;
 }) {
   const router = useRouter();
 
   return (
     <View style={[styles.card, { height }]}>
-      <View style={styles.headerRow}>
-        <TouchableOpacity
-          onPress={onBackPress || (() => router.back())}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.centerText}>{title}</Text>
-      </View>
+      {(showBack || (title && title.length > 0)) && (
+        <View style={styles.headerRow}>
+          {showBack && (
+            <TouchableOpacity
+              onPress={onBackPress || (() => router.back())}
+              style={styles.backButton}
+            >
+              <Ionicons name="arrow-back" size={24} color="#000" />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.centerText}>{title}</Text>
+        </View>
+      )}
 
       <ScrollView
         style={styles.scrollContainer}
@@ -56,9 +62,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     backgroundColor: "#fff",
-    borderTopLeftRadius: screenWidth * 0.07, // ~30 on standard screen
-    borderTopRightRadius: screenWidth * 0.07,
-    paddingVertical: screenHeight * 0.025,
+    borderTopLeftRadius: screenWidth * 0.06,
+    borderTopRightRadius: screenWidth * 0.06,
+    paddingVertical: screenHeight * 0.02,
     borderTopColor: "#FF2628",
     borderTopWidth: 2,
     borderRightColor: "#FF2628",

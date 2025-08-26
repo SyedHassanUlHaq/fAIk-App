@@ -30,9 +30,10 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <Stack initialRouteName="splash_screen" 
+      <Stack initialRouteName="dashboard" 
       screenOptions={{ headerShown: false }}>
         {/* <Stack.Screen name="splash_screen.tsx"/> */}
+        <Stack.Screen name="dashboard" />
         <Stack.Screen name="signup_screen" />
         <Stack.Screen name="email_otp" />
       </Stack>
