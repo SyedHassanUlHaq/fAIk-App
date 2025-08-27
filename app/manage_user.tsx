@@ -6,16 +6,22 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
+  TextInput,
 } from "react-native";
 import { scale } from "@/responsive";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import BottomCard from "@/components/universal_card";
+import { useState } from "react";
+
 const { height } = Dimensions.get("window");
 
-export default function DashboardProfileScreen() {
+export default function ManageUserScreen() {
   const router = useRouter();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
   return (
     <ImageBackground
       source={require("@/assets/images/dash.png")}
@@ -23,7 +29,7 @@ export default function DashboardProfileScreen() {
       style={{ flex: 1 }}
     >
       <View style={styles.headerBlock}>
-        <TouchableOpacity style={styles.topBackBtn} onPress={() => router.replace('/dashboard/home')}>
+        <TouchableOpacity style={styles.topBackBtn} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={scale(26)} color="#000" />
         </TouchableOpacity>
         <View style={styles.header}>
@@ -44,46 +50,41 @@ export default function DashboardProfileScreen() {
         </View>
       </View>
 
-      <BottomCard title="Profile" showBack={false} height={height * 0.6}>
-        {/* <Text style={styles.cardTitle}>Profile</Text> */}
-        <TouchableOpacity style={styles.cardRow} onPress={() => router.push('/manage_user')}>
-          <MaterialIcons
-            name="manage-accounts"
-            size={scale(24)}
-            color="#FF2628"
+      <BottomCard title="Manage User" showBack={false} height={height * 0.6}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>First Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter first name"
+            placeholderTextColor="#999"
+            value={firstName}
+            onChangeText={setFirstName}
           />
-          <Text style={styles.cardText}>Manage User</Text>
-          <MaterialIcons
-            name="chevron-right"
-            size={scale(22)}
-            color="#222"
-            style={{ marginLeft: "auto" }}
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Last Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter last name"
+            placeholderTextColor="#999"
+            value={lastName}
+            onChangeText={setLastName}
           />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.cardRow}>
-          <MaterialIcons name="receipt-long" size={scale(24)} color="#FF2628" />
-          <Text style={styles.cardText}>Payment</Text>
-          <MaterialIcons
-            name="chevron-right"
-            size={scale(22)}
-            color="#222"
-            style={{ marginLeft: "auto" }}
-          />
-        </TouchableOpacity>
+        </View>
 
-        <Image
+        {/* <Image
           source={require("@/assets/images/profile-image.jpg")}
           style={styles.illustration}
           resizeMode="contain"
-        />
+        /> */}
 
-        <TouchableOpacity style={styles.signOutBtn}>
+        <TouchableOpacity style={styles.signOutBtn} onPress={() => router.push('/change_password')}>
           <MaterialIcons
-            name="power-settings-new"
+            name="lock-outline"
             size={scale(22)}
             color="#fff"
           />
-          <Text style={styles.signOutText}>Sign Out</Text>
+          <Text style={styles.signOutText}>Change Password</Text>
         </TouchableOpacity>
       </BottomCard>
     </ImageBackground>
@@ -91,11 +92,6 @@ export default function DashboardProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: scale(20),
-    paddingTop: 0,
-    paddingBottom: scale(24),
-  },
   headerBlock: { paddingHorizontal: scale(20), paddingTop: scale(40) },
   topBackBtn: { position: 'absolute', left: scale(12), top: scale(50), zIndex: 5, padding: scale(6) },
   header: { alignItems: "center", marginBottom: scale(12), marginTop: scale(20) },
@@ -118,20 +114,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(12),
   },
   infoText: { fontSize: scale(15), color: "#333", fontFamily: "PoppinsMedium" },
-  card: { backgroundColor: "transparent" },
-  cardTitle: {
-    fontFamily: "PoppinsBold",
-    fontSize: scale(16),
+  inputGroup: { marginBottom: scale(12) },
+  label: { fontFamily: "PoppinsMedium", fontSize: scale(14), color: "#111", marginBottom: scale(6) },
+  input: {
+    height: scale(46),
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: scale(10),
+    paddingHorizontal: scale(12),
+    fontFamily: "Poppins",
+    fontSize: scale(14),
     color: "#111",
-    marginBottom: scale(8),
+    backgroundColor: "#fafafa",
   },
-  cardRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: scale(12),
-    gap: scale(10),
-  },
-  cardText: { color: "#111", fontFamily: "PoppinsMedium", fontSize: scale(14) },
   illustration: {
     width: "100%",
     height: scale(190),
@@ -155,3 +150,5 @@ const styles = StyleSheet.create({
     fontSize: scale(16),
   },
 });
+
+
