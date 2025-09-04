@@ -2,6 +2,7 @@ import { ImageBackground, View, Text, StyleSheet, TouchableOpacity, ScrollView }
 import { scale } from '@/responsive';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useMemo, useState } from 'react';
+import HamburgerMenu from '@/components/HamburgerMenu';
 
 export default function AnalyticScreen() {
   const [fileName, setFileName] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export default function AnalyticScreen() {
     { id: 525243, chunk: 4, fake: true, start: 0.16, end: 0.21 },
   ]);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+
   const fileOptions = useMemo(() => ([
     {
       name: 'sample_video_A.mp4',
@@ -52,72 +54,145 @@ export default function AnalyticScreen() {
 
   return (
     <ImageBackground source={require('@/assets/images/dash.png')} resizeMode="cover" style={{ flex: 1 }}>
-      <View style={styles.containerRoot}>
-        <View style={styles.containerHeader}> 
-          <TouchableOpacity style={styles.selector} activeOpacity={0.9} onPress={handlePickFile}>
-            <Text style={styles.selectorText}>{fileName ? fileName : 'Select Your File'}</Text>
-            <MaterialIcons name="keyboard-arrow-down" size={scale(22)} color="#fff" />
-          </TouchableOpacity>
-          {showDropdown && (
-            <View style={styles.dropdown}>
-              <ScrollView showsVerticalScrollIndicator style={{ maxHeight: scale(160) }}>
-                {fileOptions.map((opt) => (
-                  <TouchableOpacity key={opt.name} style={styles.dropdownItem} onPress={() => handleSelect(opt.name)}>
-                    <Text style={styles.dropdownText}>{opt.name}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
+  {/* Hamburger always on top-right */}
+  <HamburgerMenu currentScreen="analytics" />
 
-          <View style={styles.rowCards}>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{realDuration.toFixed(2)} <Text style={styles.metricUnit}>sec</Text></Text>
-              <Text style={styles.metricLabel}>Real Video{"\n"}Time Duration</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{fakeDuration.toFixed(2)} <Text style={styles.metricUnit}>sec</Text></Text>
-              <Text style={styles.metricLabel}>Fake Video{"\n"}Time Duration</Text>
-            </View>
-          </View>
+  <View style={styles.containerRoot}>
+    {/* File Selector */}
+    <View style={{ marginBottom: scale(16) }}>
+      <TouchableOpacity style={styles.selector} activeOpacity={0.9} onPress={handlePickFile}>
+        <Text style={styles.selectorText}>{fileName ? fileName : 'Select Your File'}</Text>
+        <MaterialIcons name="keyboard-arrow-down" size={scale(22)} color="#fff" />
+      </TouchableOpacity>
+
+      {showDropdown && (
+        <View style={styles.dropdown}>
+          <ScrollView showsVerticalScrollIndicator style={{ maxHeight: scale(180) }}>
+            {fileOptions.map((opt) => (
+              <TouchableOpacity key={opt.name} style={styles.dropdownItem} onPress={() => handleSelect(opt.name)}>
+                <Text style={styles.dropdownText}>{opt.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
+      )}
+    </View>
 
-        <ScrollView style={styles.statusScroll} contentContainerStyle={styles.statusScrollContent} showsVerticalScrollIndicator>
-          {statuses.map((s, idx) => (
-            <View key={`${s.id}-${idx}`} style={styles.statusCard}>
-              <Text style={styles.statusTitle}>{`Status : ${String(idx + 1).padStart(2,'0')}`}</Text>
-              <View style={styles.statusRow}>
-                <Text style={[styles.statusLine, { textAlign: 'left' }]}>ID Number : {s.id}</Text>
-                <Text style={[styles.statusLine, { textAlign: 'right' }]}>Chuck No  : {String(s.chunk).padStart(6,'0')}</Text>
-              </View>
-              <Text style={styles.statusLine}>Time : {s.start.toFixed(2)} sec - {s.end.toFixed(2)} sec  ({s.fake ? 'Fake' : 'Real'})</Text>
-            </View>
-          ))}
-        </ScrollView>
+    {/* Metric Cards */}
+    <View style={styles.rowCards}>
+      <View style={styles.metricCard}>
+        <Text style={styles.metricValue}>
+          {realDuration.toFixed(2)} <Text style={styles.metricLabel}>sec</Text>
+        </Text>
+        <Text style={styles.metricLabel}>Real Duration</Text>
       </View>
-    </ImageBackground>
+      <View style={styles.metricCard}>
+        <Text style={styles.metricValue}>
+          {fakeDuration.toFixed(2)} <Text style={styles.metricLabel}>sec</Text>
+        </Text>
+        <Text style={styles.metricLabel}>Fake Duration</Text>
+      </View>
+    </View>
+
+    {/* Status List */}
+    <ScrollView style={styles.statusScroll} contentContainerStyle={styles.statusScrollContent} showsVerticalScrollIndicator={false}>
+      {statuses.map((s, idx) => (
+        <View
+          key={`${s.id}-${idx}`}
+          style={[
+            styles.statusCard,
+            { backgroundColor: s.fake ? '#FFE5E6' : '#E6F4EA', borderLeftColor: s.fake ? '#FF2628' : '#28A745' },
+          ]}
+        >
+          <Text style={[styles.statusTitle, { color: s.fake ? '#FF2628' : '#28A745' }]}>{`Chunk ${idx + 1}`}</Text>
+          <View style={styles.statusRow}>
+            <Text style={styles.statusLine}>ID: {s.id}</Text>
+            <Text style={styles.statusLine}>#{String(s.chunk).padStart(2, '0')}</Text>
+          </View>
+          <Text style={styles.statusLine}>
+            {s.start.toFixed(2)}s - {s.end.toFixed(2)}s ({s.fake ? 'Fake' : 'Real'})
+          </Text>
+        </View>
+      ))}
+    </ScrollView>
+  </View>
+</ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  containerRoot: { flex: 1, paddingHorizontal: scale(20), paddingTop: scale(80), paddingBottom: scale(16) },
-  containerHeader: { paddingBottom: scale(12), position: 'relative' },
-  container: { paddingHorizontal: scale(20), paddingTop: scale(80), paddingBottom: scale(36) },
-  selector: { height: scale(48), borderRadius: scale(24), backgroundColor: '#FF2628', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: scale(18), marginBottom: scale(16) },
+  containerRoot: { flex: 1, paddingHorizontal: scale(20), paddingTop: scale(100), paddingBottom: scale(16) },
+
+  // Hamburger fixed at top-right
+  hamburgerWrapper: {
+    position: 'absolute',
+    top: scale(40),
+    right: scale(20),
+    zIndex: 20,
+  },
+
+  // Selector
+  selector: {
+    height: scale(50),
+    borderRadius: scale(25),
+    backgroundColor: '#FF2628',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: scale(18),
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
   selectorText: { color: '#fff', fontFamily: 'PoppinsBold', fontSize: scale(16) },
-  dropdown: { backgroundColor: '#ffffff', borderRadius: scale(12), borderWidth: 1, borderColor: '#eeeeee', overflow: 'hidden', position: 'absolute', left: 0, right: 0, top: scale(56), zIndex: 10, elevation: 10 },
-  dropdownItem: { paddingVertical: scale(10), paddingHorizontal: scale(14), borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-  dropdownText: { color: '#111' },
+
+  dropdown: {
+    backgroundColor: '#ffffff',
+    borderRadius: scale(12),
+    borderWidth: 1,
+    borderColor: '#eeeeee',
+    overflow: 'hidden',
+    marginTop: scale(8), // sits naturally under selector
+    zIndex: 10,
+    elevation: 10,
+  },
+  dropdownItem: { paddingVertical: scale(12), paddingHorizontal: scale(16), borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  dropdownText: { color: '#111', fontSize: scale(14) },
+
+  // Metric Cards
   rowCards: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: scale(16) },
-  metricCard: { width: '47%', backgroundColor: '#FF2628', borderRadius: scale(16), alignItems: 'center', justifyContent: 'center', paddingVertical: scale(16) },
-  metricValue: { color: '#fff', fontSize: scale(28), fontFamily: 'PoppinsExtraBold' },
-  metricUnit: { fontSize: scale(14), fontFamily: 'PoppinsMedium' },
-  metricLabel: { color: '#fff', textAlign: 'center', marginTop: scale(6) },
-  statusCard: { backgroundColor: '#FF2628', borderRadius: scale(8), padding: scale(14), marginBottom: scale(12) },
-  statusTitle: { color: '#fff', fontFamily: 'PoppinsBold', marginBottom: scale(6) },
-  statusLine: { color: '#fff', flex: 1 },
+  metricCard: {
+    width: '47%',
+    backgroundColor: '#fff',
+    borderRadius: scale(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: scale(16),
+    borderWidth: 2,
+    borderColor: '#FF2628',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  metricValue: { color: '#FF2628', fontSize: scale(28), fontFamily: 'PoppinsExtraBold' },
+  metricLabel: { color: '#333', textAlign: 'center', marginTop: scale(6) },
+
+  // Status cards
+  statusCard: {
+    borderLeftWidth: 6,
+    borderRadius: scale(8),
+    padding: scale(14),
+    marginBottom: scale(12),
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  statusTitle: { fontFamily: 'PoppinsBold', marginBottom: scale(6), fontSize: scale(15) },
+  statusLine: { color: '#333', fontSize: scale(13) },
   statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   statusScroll: { flex: 1 },
   statusScrollContent: { paddingBottom: scale(36) },
 });
-

@@ -1,29 +1,38 @@
 import { Tabs } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useThemeColor } from '@/hooks/useThemeColor';
 import Feather from '@expo/vector-icons/Feather';
 import Foundation from '@expo/vector-icons/Foundation';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Platform } from 'react-native';
 
 export default function DashboardLayout() {
-  const tint = useThemeColor({}, 'tint');
-  const text = useThemeColor({}, 'text');
-  const tabBarActiveTintColor = tint as string;
-  const tabBarInactiveTintColor = (text as string) + '99';
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#ffffff',
-        tabBarInactiveTintColor: '#ffeeee',
+        tabBarActiveTintColor: '#fff',
+        tabBarInactiveTintColor: '#ffcdcd',
         tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+          marginBottom: Platform.OS === 'ios' ? 0 : 4,
+        },
         tabBarStyle: {
           backgroundColor: "#FF2628",
-          borderTopWidth: 0,
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: Platform.OS === 'ios' ? 24 : 16,
+          borderRadius: 20,
           height: 64,
-          paddingBottom: 8,
-          paddingTop: 8,
+          paddingBottom: 6,
+          paddingTop: 6,
+          borderTopWidth: 0,
+          shadowColor: '#000',
+          shadowOpacity: 0.1,
+          shadowRadius: 6,
+          elevation: 5,
         },
       }}
     >
@@ -32,7 +41,7 @@ export default function DashboardLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" size={size} color={color} />
+            <MaterialIcons name="home" size={size + 2} color={color} />
           ),
         }}
       />
@@ -41,7 +50,7 @@ export default function DashboardLayout() {
         options={{
           title: 'Upload',
           tabBarIcon: ({ color, size }) => (
-            <Feather name="upload" size={size} color={color} />
+            <Feather name="upload" size={size + 2} color={color} />
           ),
         }}
       />
@@ -50,7 +59,7 @@ export default function DashboardLayout() {
         options={{
           title: 'Analytics',
           tabBarIcon: ({ color, size }) => (
-            <Foundation name="graph-bar" size={size} color={color} />
+            <Foundation name="graph-bar" size={size + 2} color={color} />
           ),
         }}
       />
@@ -59,7 +68,7 @@ export default function DashboardLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Ionicons name="person" size={size + 2} color={color} />
           ),
           href: '/profile',
         }}
@@ -67,4 +76,3 @@ export default function DashboardLayout() {
     </Tabs>
   );
 }
-
