@@ -15,9 +15,9 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import Feather from "@expo/vector-icons/Feather";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
+import RadialProgressRing from "@/components/ProgressRing";
 
 export default function DashboardHomeScreen() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -57,54 +57,48 @@ export default function DashboardHomeScreen() {
           </View>
         </Animated.View>
 
-        {/* Timeframe chips */}
-        {/* <Animated.View entering={FadeInDown.delay(80).duration(500)} style={styles.chipsRow}>
-          <Chip text="Today" active={selectedRange === "today"} onPress={() => setSelectedRange("today")} />
-          <Chip text="Week" active={selectedRange === "week"} onPress={() => setSelectedRange("week")} />
-          <Chip text="All" active={selectedRange === "all"} onPress={() => setSelectedRange("all")} />
-        </Animated.View> */}
-
-        {/* Stats */}
+        {/* Dashboard Stats */}
         <View style={styles.row}>
-          {data ? (
-            <>
-              <StatCard
-                value={(data?.totalVideos ?? 0).toString()}
-                label="Total Videos"
-                icon={<MaterialIcons name="videocam" size={22} color="#fff" />}
-                gradient={["#0EA5E9", "#6366F1"]} // cyan -> indigo
-              />
-              <StatCard
-                value={`${data?.aiGeneratedPercent ?? 0} %`}
-                label="AI Generated"
-                icon={<Ionicons name="sparkles" size={22} color="#fff" />}
-                gradient={["#22D3EE", "#3B82F6"]} // teal -> blue
-              />
-            </>
-          ) : (
-            <>
-              <SkeletonCard />
-              <SkeletonCard />
-            </>
-          )}
-        </View>
+  {data ? (
+    <>
+      <RadialProgressRing
+        progress={67} // always full circle for totals
+        value={(data?.totalVideos ?? 0).toString()}
+        label="Total Videos"
+        color="#3cd306" // 🟢 Green
+        size={110}
+      />
+      <RadialProgressRing
+        progress={29} // animate percentage
+        value={`${data?.aiGeneratedPercent ?? 0}%`}
+        label="AI Generated"
+        color="#FF4D4F" // 🔴 Red
+        size={110}
+      />
+    </>
+  ) : (
+    <>
+      <SkeletonCard />
+      <SkeletonCard />
+    </>
+  )}
+</View>
 
-        {/* Quick Actions
-        <Animated.View entering={FadeInDown.delay(120).duration(500)} style={styles.quickRow}>
-          <QuickAction
-            label="Upload"
-            icon={<Feather name="upload-cloud" size={18} color="#0A0F1C" />}
-          />
-          <QuickAction
-            label="Scan Now"
-            icon={<Ionicons name="scan" size={18} color="#0A0F1C" />}
-            prominent
-          />
-          <QuickAction
-            label="Reports"
-            icon={<Feather name="bar-chart-2" size={18} color="#0A0F1C" />}
-          />
-        </Animated.View> */}
+{/* Package Banner */}
+<View style={styles.packageBanner}>
+  <LinearGradient
+    colors={["#0473e9", "#0473e9"]} // matches your app’s accent 🔴
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 0 }}
+    style={styles.packageGradient}
+  >
+    <Ionicons name="star" size={18} color="#fff" style={{ marginRight: scale(8) }} />
+    <Text style={styles.packageText}>
+      {'Your Plan: xxxxx} : "No active package'}
+    </Text>
+  </LinearGradient>
+</View>
+
 
         {/* Recent Files (Glass) */}
         <Animated.View entering={FadeInDown.delay(160).duration(550)} style={styles.recentPanelWrap}>
@@ -123,12 +117,23 @@ export default function DashboardHomeScreen() {
                   <EmptyState />
                 ) : (
                   recentFiles.map((fileName, index) => (
-                    <Pressable style={({ pressed }) => [styles.recentItemWrap, pressed && { opacity: 0.7 }]}
-                      key={`${fileName}-${index}`}>
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.recentItemWrap,
+                        pressed && { opacity: 0.7 },
+                      ]}
+                      key={`${fileName}-${index}`}
+                    >
                       <View style={styles.recentIcon}>
-                        <Ionicons name="document-text-outline" size={16} color="#0A0F1C" />
+                        <Ionicons
+                          name="document-text-outline"
+                          size={16}
+                          color="#0A0F1C"
+                        />
                       </View>
-                      <Text style={styles.recentItem} numberOfLines={1}>{fileName}</Text>
+                      <Text style={styles.recentItem} numberOfLines={1}>
+                        {fileName}
+                      </Text>
                       <Ionicons name="chevron-forward" size={16} color="#0A0F1C" />
                     </Pressable>
                   ))
@@ -151,14 +156,6 @@ export default function DashboardHomeScreen() {
 
 /* ---------- Components ---------- */
 
-function Chip({ text, active, onPress }: { text: string; active?: boolean; onPress?: () => void }) {
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.chip, active && styles.chipActive, pressed && { opacity: 0.8 }]}>
-      <Text style={[styles.chipText, active && styles.chipTextActive]}>{text}</Text>
-    </Pressable>
-  );
-}
-
 function StatCard({
   value,
   label,
@@ -172,7 +169,7 @@ function StatCard({
 }) {
   return (
     <LinearGradient
-      colors={["#FF4D4F", "#FF2628"]}
+      colors={gradient}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.statCard}
@@ -180,34 +177,8 @@ function StatCard({
       <View style={styles.iconWrap}>{icon}</View>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
-
-      {/* glow ring */}
       <View style={styles.glow} />
     </LinearGradient>
-  );
-}
-
-function QuickAction({
-  label,
-  icon,
-  prominent,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  prominent?: boolean;
-}) {
-  return (
-    <Pressable style={({ pressed }) => [styles.quickBtnOuter, pressed && { transform: [{ scale: 0.98 }] }]}>
-      <LinearGradient
-        colors={prominent ? ["#93C5FD", "#A5B4FC"] : ["#E5E7EB", "#F3F4F6"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.quickBtn}
-      >
-        <View style={styles.quickIconWrap}>{icon}</View>
-        <Text style={styles.quickText}>{label}</Text>
-      </LinearGradient>
-    </Pressable>
   );
 }
 
@@ -267,39 +238,12 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsMedium",
   },
 
-  /* Chips */
-  chipsRow: {
-    flexDirection: "row",
-    gap: scale(8),
-    justifyContent: "center",
-    marginBottom: scale(2),
-  },
-  chip: {
-    paddingVertical: scale(6),
-    paddingHorizontal: scale(14),
-    borderRadius: scale(20),
-    backgroundColor: "rgba(255,255,255,0.65)",
-    borderWidth: 1,
-    borderColor: "rgba(15,23,42,0.08)",
-  },
-  chipActive: {
-    backgroundColor: "rgba(59,130,246,0.18)",
-    borderColor: "rgba(59,130,246,0.35)",
-  },
-  chipText: {
-    fontFamily: "PoppinsMedium",
-    fontSize: scale(12),
-    color: "#0A0F1C",
-  },
-  chipTextActive: {
-    color: "#1E3A8A",
-  },
-
   /* Stats */
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    gap: scale(14),
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginTop: scale(16),
   },
   statCard: {
     flex: 1,
@@ -340,41 +284,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.12)",
     bottom: -scale(80),
     right: -scale(60),
-  },
-
-  /* Quick Actions */
-  quickRow: {
-    flexDirection: "row",
-    gap: scale(12),
-    marginTop: scale(2),
-  },
-  quickBtnOuter: {
-    flex: 1,
-  },
-  quickBtn: {
-    flex: 1,
-    height: scale(56),
-    borderRadius: scale(16),
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: scale(8),
-    borderWidth: 1,
-    borderColor: "rgba(15,23,42,0.06)",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  quickIconWrap: {
-    backgroundColor: "rgba(255,255,255,0.8)",
-    padding: scale(6),
-    borderRadius: scale(10),
-  },
-  quickText: {
-    fontFamily: "PoppinsMedium",
-    color: "#0A0F1C",
-    fontSize: scale(13),
   },
 
   /* Recent Files (Glass) */
@@ -502,5 +411,28 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsMedium",
     color: "#6B7280",
     fontSize: scale(11),
+  },
+  packageBanner: {
+    marginTop: scale(20),
+    alignItems: "center",
+  },
+  
+  packageGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: scale(10),
+    paddingHorizontal: scale(18),
+    borderRadius: scale(14),
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  
+  packageText: {
+    fontFamily: "PoppinsBold",
+    fontSize: scale(14),
+    color: "#fff",
   },
 });
