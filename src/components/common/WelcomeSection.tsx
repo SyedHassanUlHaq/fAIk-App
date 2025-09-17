@@ -100,32 +100,69 @@ export default function WelcomeSection({
           >
             <Text
               style={{
-                fontSize: 35,
-                color: "#000000",
-                fontFamily: "PoppinsSemiBold",
+                fontSize: 28,
+                color: "#1a1a1a",
+                fontFamily: "Poppins-ExtraBold",
+                lineHeight: 36,
+                letterSpacing: -0.8,
+                textShadowColor: 'rgba(0, 0, 0, 0.1)',
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 4,
+                fontWeight: '800',
               }}
             >
               <Text
                 style={{
                   color: "#FF2628",
-                  fontFamily: "PoppinsExtraBold",
+                  fontFamily: "Poppins-Black",
+                  fontSize: 32,
+                  letterSpacing: -1.2,
+                  fontWeight: "900",
+                  textShadowColor: 'rgba(255, 38, 40, 0.3)',
+                  textShadowOffset: { width: 0, height: 3 },
+                  textShadowRadius: 6,
                 }}
               >
-                Swipe up{" "}
+                SWIPE UP{" "}
               </Text>
-              to {"\n"}
-              uncover digital{"\n"}
-              deceptions.
+              {"\n"}to {"\n"}
+              <Text style={{ color: "#0473ea", fontFamily: "Poppins-Bold", fontWeight: "700" }}>
+                uncover digital{"\n"}
+              </Text>
+              <Text style={{ color: "#38d200", fontFamily: "Poppins-SemiBold", fontWeight: "600" }}>
+                deceptions.
+              </Text>
             </Text>
           </Animated.View>
           {/* New Welcome Text */}
           <Animated.View
             style={[{ paddingHorizontal: 20, bottom: 50 }, animatedNewTextOpacity]}
           >
-            <Text style={{ fontSize: 35, fontFamily: "PoppinsExtraBold" }}>
-              <Text style={{ color: "#FF2628" }}>Hello.</Text>
+            <Text style={{ 
+              fontSize: 32, 
+              fontFamily: "Poppins-Black", 
+              lineHeight: 40, 
+              letterSpacing: -1.0,
+              textShadowColor: 'rgba(0, 0, 0, 0.15)',
+              textShadowOffset: { width: 0, height: 2 },
+              textShadowRadius: 4,
+              fontWeight: '900'
+            }}>
+              <Text style={{ 
+                color: "#FF2628", 
+                fontFamily: "Poppins-Black",
+                fontSize: 36,
+                textShadowColor: 'rgba(255, 38, 40, 0.4)',
+                textShadowOffset: { width: 0, height: 3 },
+                textShadowRadius: 6,
+              }}>Hello.</Text>
               {"\n"}
-              <Text style={{ color: "#000000" }}>Welcome back!</Text>
+              <Text style={{ 
+                color: "#1a1a1a", 
+                fontFamily: "Poppins-ExtraBold",
+                fontSize: 28,
+                letterSpacing: -0.6,
+              }}>Welcome back!</Text>
             </Text>
           </Animated.View>
         </Animated.View>
@@ -171,8 +208,14 @@ const styles = StyleSheet.create({
   },
   tryButtonText: {
     color: "#FF2628",
-    fontSize: 14,
-    fontFamily: "PoppinsSemiBold",
+    fontSize: 15,
+    fontFamily: "Poppins-Bold",
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    textShadowColor: 'rgba(255, 38, 40, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   logoContainer: {
     alignItems: "center",
@@ -190,18 +233,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   descriptionTitle: {
-    fontSize: 48,
-    fontFamily: "PoppinsBold",
-    color: "#FF2628", // Red color
-    marginBottom: 10,
+    fontSize: 38,
+    fontFamily: "Poppins-Black",
+    color: "#FF2628",
+    marginBottom: 16,
     textAlign: "center",
+    lineHeight: 46,
+    letterSpacing: -1.2,
+    fontWeight: "900",
+    textShadowColor: 'rgba(255, 38, 40, 0.3)',
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 6,
   },
   descriptionText: {
-    fontSize: 28,
-    fontFamily: "PoppinsMedium",
-    color: "#38d20F", // Blue color
+    fontSize: 21,
+    fontFamily: "Poppins-Bold",
+    color: "#0473ea",
     textAlign: "center",
-    lineHeight: 40,
+    lineHeight: 30,
+    marginBottom: 12,
+    letterSpacing: -0.3,
+    fontWeight: "700",
+    textShadowColor: 'rgba(4, 115, 234, 0.2)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   welcomeImageContainer: {
     alignItems: "center",
@@ -217,11 +272,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   stepsTitle: {
-    fontSize: 22,
-    fontFamily: "PoppinsBold",
+    fontSize: 26,
+    fontFamily: "Poppins-Black",
     color: "#FF2628",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
+    lineHeight: 32,
+    letterSpacing: -0.8,
+    fontWeight: "900",
+    textShadowColor: 'rgba(255, 38, 40, 0.25)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   stepsScrollContainer: {
     paddingHorizontal: 10,
@@ -232,33 +293,45 @@ const styles = StyleSheet.create({
     width: 140,
   },
   stepIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: "#0473ea",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 15,
-    shadowColor: "#000",
+    marginBottom: 16,
+    shadowColor: "#0473ea",
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 6,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   stepNumber: {
-    fontSize: 28,
-    fontFamily: "PoppinsBold",
+    fontSize: 26,
+    fontFamily: "Poppins-Black",
     color: "#fff",
+    fontWeight: "900",
+    letterSpacing: -0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   stepText: {
-    fontSize: 16,
-    fontFamily: "PoppinsMedium",
-    color: "#333",
+    fontSize: 15,
+    fontFamily: "Poppins-SemiBold",
+    color: "#1a1a1a",
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: 22,
+    letterSpacing: -0.1,
+    fontWeight: "600",
+    textShadowColor: 'rgba(0, 0, 0, 0.08)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   welcomeText: {
     marginTop: 30,

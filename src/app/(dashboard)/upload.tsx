@@ -1,29 +1,29 @@
-import {
-  ImageBackground,
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-  Alert,
-  ScrollView,
-} from "react-native";
-import { useEffect, useRef, useState } from "react";
-import { Animated } from "react-native";
+import HamburgerMenu from "@/components/layout/HamburgerMenu";
 import { scale } from "@/responsive";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {
+    mockFetchReport,
+    mockStartProcessing,
+    mockUploadFile,
+} from "@/utils/api";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import * as WebBrowser from "expo-web-browser";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useEffect, useRef, useState } from "react";
 import {
-  mockUploadFile,
-  mockStartProcessing,
-  mockFetchReport,
-} from "@/utils/api";
-import HamburgerMenu from "@/components/layout/HamburgerMenu";
+    Alert,
+    Animated,
+    Image,
+    ImageBackground,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 export default function UploadScreen() {
   const router = useRouter();
@@ -355,8 +355,28 @@ const styles = StyleSheet.create({
     maxWidth: 320,       // don’t blow up too much on tablets
     opacity: 0.95,
   },
-  title: { fontSize: 20, fontWeight: "bold", color: "#000", marginTop: 12 },
-  subtitleCenter: { fontSize: 14, color: "#666", textAlign: "center" },
+  title: { 
+    fontSize: 26, 
+    fontWeight: "900", 
+    color: "#1a1a1a", 
+    marginTop: 16,
+    fontFamily: "Poppins-Black",
+    letterSpacing: -0.8,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    textAlign: "center",
+  },
+  subtitleCenter: { 
+    fontSize: 17, 
+    color: "#4b5563", 
+    textAlign: "center",
+    fontFamily: "Poppins-Medium",
+    fontWeight: "500",
+    letterSpacing: -0.1,
+    lineHeight: 24,
+    marginTop: 8,
+  },
 
   card: {
     backgroundColor: "#fff",
@@ -365,7 +385,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     elevation: 3,
   },
-  cardTitle: { fontSize: 15, fontWeight: "bold", color: "#000", marginBottom: 10 },
+  cardTitle: { 
+    fontSize: 18, 
+    fontWeight: "700", 
+    color: "#1a1a1a", 
+    marginBottom: 14,
+    fontFamily: "Poppins-Bold",
+    letterSpacing: -0.4,
+    textShadowColor: 'rgba(0, 0, 0, 0.08)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
 
   toggleRow: { flexDirection: "row", borderRadius: 8, overflow: "hidden" },
   toggleBtn: {
@@ -377,8 +407,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f1f1",
   },
   toggleBtnActive: { backgroundColor: "#FF2628" },
-  toggleText: { marginLeft: 6, color: "#333" },
-  toggleTextActive: { color: "#fff", fontWeight: "bold" },
+  toggleText: { 
+    marginLeft: 8, 
+    color: "#4b5563",
+    fontFamily: "Poppins-SemiBold",
+    fontWeight: "600",
+    letterSpacing: -0.2,
+  },
+  toggleTextActive: { 
+    color: "#fff", 
+    fontWeight: "700",
+    fontFamily: "Poppins-Bold",
+  },
 
   actionBtn: {
     flexDirection: "row",
@@ -388,7 +428,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     elevation: 2,
   },
-  actionText: { flex: 1, marginLeft: 10, color: "#333" },
+  actionText: { 
+    flex: 1, 
+    marginLeft: 12, 
+    color: "#1f2937",
+    fontFamily: "Poppins-Medium",
+    fontWeight: "500",
+    letterSpacing: -0.1,
+  },
 
   inputRow: {
     flexDirection: "row",
@@ -398,7 +445,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     elevation: 1,
   },
-  input: { flex: 1, marginLeft: 10, color: "#000" },
+  input: { 
+    flex: 1, 
+    marginLeft: 12, 
+    color: "#1f2937",
+    fontFamily: "Poppins-Medium",
+    fontWeight: "500",
+    letterSpacing: -0.1,
+    fontSize: 16,
+  },
 
   uploadBtn: {
     marginTop: 8,
@@ -410,10 +465,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF2628",
   },
   uploadBtnDisabled: { backgroundColor: "#ddd" },
-  uploadBtnText: { marginLeft: 6, color: "#fff", fontWeight: "bold" },
+  uploadBtnText: { 
+    marginLeft: 8, 
+    color: "#fff", 
+    fontWeight: "700",
+    fontFamily: "Poppins-Bold",
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+  },
   uploadBtnTextDisabled: { color: "#999" },
 
-  filename: { flex: 1, marginLeft: 10, color: "#111" },
+  filename: { 
+    flex: 1, 
+    marginLeft: 12, 
+    color: "#1f2937",
+    fontFamily: "Poppins-Medium",
+    fontWeight: "500",
+    letterSpacing: -0.1,
+  },
 
   processBtn: {
     flexDirection: "row",
@@ -425,7 +494,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     elevation: 5,
   },
-  processText: { marginLeft: 8, color: "#fff", fontWeight: "bold" },
+  processText: { 
+    marginLeft: 10, 
+    color: "#fff", 
+    fontWeight: "700",
+    fontFamily: "Poppins-Bold",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
   btnDisabled: { backgroundColor: "#ccc" },
 
   progressHeader: {
@@ -433,7 +512,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 6,
   },
-  progressText: { color: "#FF2628", fontWeight: "bold" },
+  progressText: { 
+    color: "#FF2628", 
+    fontWeight: "700",
+    fontFamily: "Poppins-Bold",
+    letterSpacing: -0.2,
+    textShadowColor: 'rgba(255, 38, 40, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
   progressBar: {
     height: 8,
     borderRadius: 4,
@@ -441,7 +528,15 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 6,
   },
-  smallText: { fontSize: 12, color: "#666", textAlign: "center" },
+  smallText: { 
+    fontSize: 14, 
+    color: "#4b5563", 
+    textAlign: "center",
+    fontFamily: "Poppins-Medium",
+    fontWeight: "500",
+    letterSpacing: -0.1,
+    lineHeight: 20,
+  },
 
   reportBtn: {
     flexDirection: "row",
@@ -452,5 +547,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 5,
   },
-  reportText: { marginLeft: 8, color: "#fff", fontWeight: "bold" },
+  reportText: { 
+    marginLeft: 10, 
+    color: "#fff", 
+    fontWeight: "700",
+    fontFamily: "Poppins-Bold",
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
 });

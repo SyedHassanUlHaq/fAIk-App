@@ -5,26 +5,26 @@ import { BlurView } from 'expo-blur';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  Dimensions,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Alert,
+    Dimensions,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import {
-  GestureHandlerRootView
+    GestureHandlerRootView
 } from "react-native-gesture-handler";
 import Animated, {
-  Extrapolate,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming
+    Extrapolate,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming
 } from "react-native-reanimated";
 import LoginForm from "../../components/forms/LoginForm";
 
@@ -252,9 +252,14 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   backButtonText: {
-    fontSize: 24,
+    fontSize: 28,
     color: "#FF2628",
-    fontFamily: "PoppinsBold",
+    fontFamily: "Poppins-Black",
+    fontWeight: "900",
+    textShadowColor: 'rgba(255, 38, 40, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    letterSpacing: -0.5,
   },
   welcomeImageContainer: {
     position: "absolute",
@@ -279,18 +284,28 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   animatedTextTitle: {
-    fontSize: 28,
-    fontFamily: "PoppinsBold",
+    fontSize: 32,
+    fontFamily: "Poppins-Black",
     color: "#FF2628",
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: 16,
+    fontWeight: "900",
+    letterSpacing: -1.0,
+    textShadowColor: 'rgba(255, 38, 40, 0.3)',
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 6,
   },
   animatedTextDescription: {
-    fontSize: 18,
-    fontFamily: "Poppins",
-    color: "#333",
+    fontSize: 20,
+    fontFamily: "Poppins-SemiBold",
+    color: "#1a1a1a",
     textAlign: "center",
-    lineHeight: 28,
+    lineHeight: 30,
+    fontWeight: "600",
+    letterSpacing: -0.2,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   highlightText: {
     color: "#0473ea",
@@ -329,9 +344,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   cardPreviewText: {
-    fontSize: 16,
-    fontFamily: "PoppinsSemiBold",
-    color: "#000",
+    fontSize: 18,
+    fontFamily: "Poppins-Bold",
+    color: "#1a1a1a",
+    fontWeight: "700",
+    letterSpacing: -0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   cardPreviewIcon: {
     width: 32,
@@ -343,8 +363,13 @@ const styles = StyleSheet.create({
   },
   cardPreviewIconText: {
     color: "#fff",
-    fontSize: 16,
-    fontFamily: "PoppinsBold",
+    fontSize: 18,
+    fontFamily: "Poppins-Black",
+    fontWeight: "900",
+    letterSpacing: -0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   loginCard: {
     position: "absolute",
@@ -391,17 +416,25 @@ const styles = StyleSheet.create({
     paddingVertical: 19, // (44 - 6) / 2
   },
   loginTitle: {
-    fontSize: 24,
-    fontFamily: "PoppinsSemiBold",
-    marginBottom: 24,
+    fontSize: 28,
+    fontFamily: "Poppins-Black",
+    marginBottom: 28,
     textAlign: "center",
-    color: "#000",
+    color: "#1a1a1a",
+    fontWeight: "900",
+    letterSpacing: -0.8,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   footerText: {
-    fontSize: 16,
+    fontSize: 17,
     textAlign: "center",
-    color: "#666",
-    marginTop: 24,
-    fontFamily: "Poppins",
+    color: "#4b5563",
+    marginTop: 28,
+    fontFamily: "Poppins-Medium",
+    fontWeight: "500",
+    letterSpacing: -0.1,
+    lineHeight: 24,
   },
 });
